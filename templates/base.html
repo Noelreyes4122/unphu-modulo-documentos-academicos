@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}UNPHU SIST{% endblock %}</title>
+{% load static %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/unphu.css' %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     TOP BAR  — matches UNPHU SIST screenshot
+════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="brand-text">UNPHU<span class="brand-sist">SIST</span></span>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" id="userPill">
+      <span class="user-name">{{ request.user.get_full_name }}</span>
+      <i class="bi bi-chevron-down user-arrow"></i>
+      <div class="user-dropdown" id="userDropdown">
+        <a href="{% url 'perfil' %}" class="dd-item"><i class="bi bi-person"></i> Mi Perfil</a>
+        {% if request.user.is_admin_staff %}
+        <a href="{% url 'admin_panel' %}" class="dd-item"><i class="bi bi-shield-check"></i> Panel Admin</a>
+        {% endif %}
+        <div class="dd-divider"></div>
+        <a href="{% url 'logout' %}" class="dd-item dd-logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════ -->
+<nav class="sidebar" id="sidebar">
+
+  <a href="{% url 'perfil' %}"
+     class="nav-item {% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">
+    <i class="nav-ico bi bi-person"></i>
+    <span class="nav-txt">Perfil</span>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Selección de materias no disponible en demo')">
+    <i class="nav-ico bi bi-check2-square"></i>
+    <span class="nav-txt">Selección</span>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Mi pensum no disponible en demo')">
+    <i class="nav-ico bi bi-person-lines-fill"></i>
+    <span class="nav-txt">Mi pensum</span>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Historial de calificaciones no disponible en demo')">
+    <i class="nav-ico bi bi-search"></i>
+    <span class="nav-txt">Historial de calificaciones</span>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Retiros no disponible en demo')">
+    <i class="nav-ico bi bi-arrow-left-right"></i>
+    <span class="nav-txt">Retiros</span>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Recibos no disponible en demo')">
+    <i class="nav-ico bi bi-receipt"></i>
+    <span class="nav-txt">Recibos</span>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Pago en línea no disponible en demo')">
+    <i class="nav-ico bi bi-credit-card"></i>
+    <span class="nav-txt">Pago</span>
+  </a>
+
+  <a href="#" class="nav-item nav-has-arrow" onclick="showToast('Reportes no disponible en demo')">
+    <i class="nav-ico bi bi-bar-chart-line"></i>
+    <span class="nav-txt">Reportes</span>
+    <i class="bi bi-chevron-right nav-chevron"></i>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Solicitud de graduación no disponible en demo')">
+    <i class="nav-ico bi bi-clipboard-check"></i>
+    <span class="nav-txt">Solicitud de graduación</span>
+  </a>
+
+  <div class="nav-divider"></div>
+
+  <!-- ★ NEW MODULE -->
+  <a href="{% url 'solicitud_docs' %}"
+     class="nav-item nav-highlight {% if 'solicitud' in request.path or 'admin-panel' in request.path %}active{% endif %}">
+    <i class="nav-ico bi bi-file-earmark-text"></i>
+    <span class="nav-txt">Solicitud de Documentos</span>
+    <span class="nav-badge-new">NUEVO</span>
+  </a>
+
+  {% if request.user.is_admin_staff %}
+  <a href="{% url 'admin_panel' %}"
+     class="nav-item nav-admin {% if 'admin-panel' in request.path %}active{% endif %}">
+    <i class="nav-ico bi bi-shield-check"></i>
+    <span class="nav-txt">Panel Administrativo</span>
+  </a>
+  {% endif %}
+
+  <div class="nav-divider"></div>
+
+  <a href="#" class="nav-item" onclick="showToast('Asistencia (módulo externo)')">
+    <i class="nav-ico bi bi-question-circle"></i>
+    <span class="nav-txt">Asistencia</span>
+    <i class="bi bi-box-arrow-up-right nav-ext"></i>
+  </a>
+
+  <a href="#" class="nav-item" onclick="showToast('Calendario Académico (módulo externo)')">
+    <i class="nav-ico bi bi-calendar3"></i>
+    <span class="nav-txt">Calendario Academico</span>
+    <i class="bi bi-box-arrow-up-right nav-ext"></i>
+  </a>
+
+  <button class="sidebar-collapse-btn" id="collapseBtn" onclick="toggleSidebar()">
+    <i class="bi bi-chevron-double-left" id="collapseIcon"></i>
+    <span class="nav-txt" id="collapseLabel">Ocultar menu</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════ -->
+<main class="main" id="mainContent">
+  {% if messages %}
+  <div class="django-messages">
+    {% for msg in messages %}
+    <div class="dmsg dmsg-{{ msg.tags }}">
+      <i class="bi bi-{% if 'error' in msg.tags %}exclamation-triangle{% else %}check-circle{% endif %}"></i>
+      {{ msg }}
+      <button onclick="this.parentElement.remove()" class="dmsg-close">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════ -->
+<footer class="footer-bar" id="footerBar">
+  UNPHU © Todos los derechos reservados 2026
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     TOAST
+════════════════════════════════════════════ -->
+<div class="toast" id="sysToast">
+  <i class="bi bi-info-circle toast-ico"></i>
+  <span id="toastMsg">Mensaje</span>
+</div>
+
+<script>
+'use strict';
+
+/* ── Sidebar collapse ───────────────────────────── */
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  const sb   = document.getElementById('sidebar');
+  const main = document.getElementById('mainContent');
+  const foot = document.getElementById('footerBar');
+  const icon = document.getElementById('collapseIcon');
+  const lbl  = document.getElementById('collapseLabel');
+
+  if (sidebarOpen) {
+    sb.classList.remove('collapsed');
+    main.classList.remove('sb-collapsed');
+    foot.classList.remove('sb-collapsed');
+    icon.className = 'bi bi-chevron-double-left';
+    lbl.textContent = 'Ocultar menu';
+  } else {
+    sb.classList.add('collapsed');
+    main.classList.add('sb-collapsed');
+    foot.classList.add('sb-collapsed');
+    icon.className = 'bi bi-chevron-double-right';
+    lbl.textContent = '';
+  }
+}
+
+/* ── User dropdown ──────────────────────────────── */
+document.getElementById('userPill').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('userDropdown').classList.toggle('open');
+});
+document.addEventListener('click', function() {
+  document.getElementById('userDropdown').classList.remove('open');
+});
+
+/* ── Toast ──────────────────────────────────────── */
+let _tt = null;
+function showToast(msg, duration) {
+  const el = document.getElementById('sysToast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('show');
+  if (_tt) clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), duration || 3000);
+}
+
+/* ── Auto-dismiss messages ──────────────────────── */
+document.querySelectorAll('.dmsg').forEach(el => {
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 5000);
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

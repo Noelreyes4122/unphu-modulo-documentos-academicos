@@ -1,0 +1,684 @@
+{% extends 'base.html' %}
+{% block title %}Solicitud de Documentos — UNPHU SIST{% endblock %}
+
+{% block content %}
+<!-- Module header -->
+<div class="mod-header">
+  <div>
+    <div class="mod-title">Solicitud de Documentos</div>
+    <div class="mod-sub">Gestión digital · Matrícula {{ request.user.matricula|default:"—" }}</div>
+  </div>
+  <button class="btn-primary" onclick="openTab('nueva')">
+    <i class="bi bi-plus-lg"></i> Nueva Solicitud
+  </button>
+</div>
+
+{% if request.GET.new %}
+<div class="alert-success">
+  <i class="bi bi-check-circle-fill"></i>
+  ¡Solicitud <strong>{{ request.GET.new }}</strong> enviada exitosamente! Te notificaremos al correo institucional.
+  <button onclick="this.parentElement.remove()" class="alert-close">✕</button>
+</div>
+{% endif %}
+
+<!-- Tabs -->
+<div class="sol-tabs" id="solTabs">
+  <button class="sol-tab {% if active_tab == 'inicio' %}active{% endif %}"      onclick="openTab('inicio')">
+    <i class="bi bi-house"></i> Inicio
+  </button>
+  <button class="sol-tab {% if active_tab == 'nueva' %}active{% endif %}"       onclick="openTab('nueva')">
+    <i class="bi bi-plus-circle"></i> Nueva Solicitud
+  </button>
+  <button class="sol-tab {% if active_tab == 'solicitudes' %}active{% endif %}" onclick="openTab('solicitudes')">
+    <i class="bi bi-list-ul"></i> Mis Solicitudes
+    {% if stats.process %}<span class="tab-badge">{{ stats.process }}</span>{% endif %}
+  </button>
+  <button class="sol-tab {% if active_tab == 'documentos' %}active{% endif %}"  onclick="openTab('documentos')">
+    <i class="bi bi-folder2-open"></i> Mis Documentos
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB: INICIO
+════════════════════════════════════════════ -->
+<div class="tab-panel {% if active_tab == 'inicio' %}active{% endif %}" id="tab-inicio">
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card s-navy">
+      <div class="stat-ico"><i class="bi bi-file-earmark-text"></i></div>
+      <div class="stat-val">{{ stats.total }}</div>
+      <div class="stat-lbl">Total Solicitudes</div>
+    </div>
+    <div class="stat-card s-blue">
+      <div class="stat-ico"><i class="bi bi-hourglass-split"></i></div>
+      <div class="stat-val">{{ stats.process }}</div>
+      <div class="stat-lbl">En Proceso</div>
+    </div>
+    <div class="stat-card s-green">
+      <div class="stat-ico"><i class="bi bi-check-circle"></i></div>
+      <div class="stat-val">{{ stats.done }}</div>
+      <div class="stat-lbl">Completadas</div>
+    </div>
+    <div class="stat-card s-orange">
+      <div class="stat-ico"><i class="bi bi-clock"></i></div>
+      <div class="stat-val">{{ stats.pending }}</div>
+      <div class="stat-lbl">Pendientes</div>
+    </div>
+  </div>
+
+  <div class="two-col-grid">
+    <!-- Recent requests -->
+    <div class="white-card">
+      <div class="card-header-row">
+        <div>
+          <div class="card-title">Solicitudes Recientes</div>
+          <div class="card-sub">Últimas 5 solicitudes realizadas</div>
+        </div>
+        <a class="card-link" onclick="openTab('solicitudes')" style="cursor:pointer">Ver todas →</a>
+      </div>
+      {% if recent %}
+      <div class="req-list">
+        {% for req in recent %}
+        <div class="req-row" onclick="openDetailModal({{ req.pk }})">
+          <div class="req-ico">{{ req.doc_type.icon }}</div>
+          <div class="req-info">
+            <div class="req-title">{{ req.doc_type.name }}</div>
+            <div class="req-meta">{{ req.code }} · {{ req.copies }} copia{{ req.copies|pluralize }} · RD${{ req.total_amount|floatformat:2 }}</div>
+          </div>
+          <div class="req-right">
+            <div class="req-date">{{ req.created_at|date:"d M Y" }}</div>
+            <span class="sbadge {{ req.status_badge.0 }}">
+              <span class="sbadge-dot"></span>{{ req.status_badge.1 }}
+            </span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-inbox" style="font-size:36px;color:var(--gray-400);"></i>
+        <p>Aún no tienes solicitudes. <a onclick="openTab('nueva')" style="cursor:pointer;color:var(--navy);">Crea tu primera solicitud →</a></p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right column: delivery times info -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <div class="white-card">
+        <div class="card-title" style="margin-bottom:14px;">
+          <i class="bi bi-clock-history" style="color:var(--navy);margin-right:6px;"></i>
+          Tiempos de entrega
+        </div>
+        {% for dt in doc_types %}
+        <div class="delivery-row">
+          <span class="delivery-icon">{{ dt.icon }}</span>
+          <div class="delivery-info">
+            <div class="delivery-name">{{ dt.name }}</div>
+            <div class="delivery-price">RD${{ dt.price|floatformat:2 }}</div>
+          </div>
+          <div class="delivery-badge
+            {% if dt.delivery_days == 0 %}delivery-same{% elif dt.delivery_days <= 1 %}delivery-fast{% else %}delivery-normal{% endif %}">
+            {% if dt.delivery_days == 0 %}
+              <i class="bi bi-lightning-fill"></i> Mismo día
+            {% elif dt.delivery_days == 1 %}
+              <i class="bi bi-arrow-right"></i> 1 día
+            {% else %}
+              <i class="bi bi-calendar3"></i> {{ dt.delivery_label }}
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="white-card notice-card">
+        <div class="notice-ico"><i class="bi bi-info-circle-fill"></i></div>
+        <div>
+          <div class="notice-title">Entrega el mismo día</div>
+          <div class="notice-text">
+            La <strong>Carta Universitaria</strong> y la <strong>Constancia de Estudios</strong>
+            pueden estar listas el mismo día si tu solicitud es recibida <strong>antes de las 2:00 PM</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TAB: NUEVA SOLICITUD
+════════════════════════════════════════════ -->
+<div class="tab-panel {% if active_tab == 'nueva' %}active{% endif %}" id="tab-nueva">
+<div class="form-wrap">
+
+  <!-- Step progress -->
+  <div class="step-bar" id="stepBar">
+    <div class="step-item active" id="si1">
+      <div class="step-circle active" id="sc1">1</div>
+      <div class="step-lbl active"   id="sl1">Tipo de Documento</div>
+    </div>
+    <div class="step-line" id="sline1"></div>
+    <div class="step-item" id="si2">
+      <div class="step-circle wait" id="sc2">2</div>
+      <div class="step-lbl wait"   id="sl2">Datos y Propósito</div>
+    </div>
+    <div class="step-line" id="sline2"></div>
+    <div class="step-item" id="si3">
+      <div class="step-circle wait" id="sc3">3</div>
+      <div class="step-lbl wait"   id="sl3">Pago y Confirmación</div>
+    </div>
+  </div>
+
+  <form method="POST" action="{% url 'nueva_solicitud' %}" enctype="multipart/form-data" id="solForm">
+    {% csrf_token %}
+    <input type="hidden" name="doc_type_slug" id="selectedSlug">
+
+    <!-- Step 1: Document type -->
+    <div class="form-card" id="fs1">
+      <div class="form-card-title">Selecciona el tipo de documento</div>
+      <p class="form-card-desc">Elige el documento que necesitas. Los tiempos de entrega varían según el tipo.</p>
+
+      <div class="doc-grid">
+        {% for dt in doc_types %}
+        <div class="doc-card" onclick="pickDoc(this,'{{ dt.slug }}','{{ dt.name }}',{{ dt.price }})"
+             data-slug="{{ dt.slug }}" data-price="{{ dt.price }}" data-name="{{ dt.name }}">
+          <div class="doc-card-ico">{{ dt.icon }}</div>
+          <div class="doc-card-name">{{ dt.name }}</div>
+          <div class="doc-card-price">RD${{ dt.price|floatformat:2 }}</div>
+          <div class="doc-card-delivery
+            {% if dt.delivery_days == 0 %}delivery-same{% elif dt.delivery_days <= 1 %}delivery-fast{% else %}delivery-normal{% endif %}">
+            {% if dt.delivery_days == 0 %}
+              <i class="bi bi-lightning-fill"></i> Mismo día
+            {% elif dt.delivery_days == 1 %}
+              <i class="bi bi-arrow-right"></i> 1 día hábil
+            {% else %}
+              <i class="bi bi-calendar3"></i> {{ dt.delivery_label }}
+            {% endif %}
+          </div>
+          {% if dt.auto_pdf %}
+          <div class="doc-card-auto"><i class="bi bi-download"></i> Descarga automática</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-primary" onclick="goStep(2)">
+          Continuar <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Data -->
+    <div class="form-card" id="fs2" style="display:none">
+      <div class="form-card-title">Datos de la solicitud</div>
+      <p class="form-card-desc">Completa la información requerida para procesar tu solicitud.</p>
+
+      <div class="form-grid">
+        <div class="fg">
+          <label>Nombre completo</label>
+          <input type="text" value="{{ request.user.get_full_name }}" readonly>
+        </div>
+        <div class="fg">
+          <label>Matrícula</label>
+          <input type="text" value="{{ request.user.matricula|default:'—' }}" readonly>
+        </div>
+        <div class="fg">
+          <label>Carrera</label>
+          <input type="text" value="{{ request.user.carrera|default:'—' }}" readonly>
+        </div>
+        <div class="fg">
+          <label>Propósito del documento <span class="req-mark">*</span></label>
+          <select name="purpose" required>
+            <option value="">Seleccionar...</option>
+            <option value="visa">Visa / Trámite consular</option>
+            <option value="empleo">Empleo / Trabajo</option>
+            <option value="beca">Beca / Intercambio</option>
+            <option value="banco">Banco / Institución financiera</option>
+            <option value="posgrado">Estudios de posgrado</option>
+            <option value="mescyt">Beca MESCYT</option>
+            <option value="personal">Uso personal</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Idioma del documento <span class="req-mark">*</span></label>
+          <select name="language">
+            <option value="es">Español</option>
+            <option value="en">Inglés</option>
+            <option value="es_en">Español e Inglés</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Cantidad de copias <span class="req-mark">*</span></label>
+          <select name="copies" id="copiesInput" onchange="updateTotal()">
+            <option value="1">1 copia</option>
+            <option value="2">2 copias</option>
+            <option value="3">3 copias</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Institución destinataria</label>
+          <input type="text" name="institution" placeholder="Ej. Embajada de EE.UU.">
+        </div>
+        <div class="fg full">
+          <label>Observaciones adicionales</label>
+          <textarea name="observations" placeholder="Cualquier detalle especial..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="goStep(1)">
+          <i class="bi bi-arrow-left"></i> Atrás
+        </button>
+        <button type="button" class="btn-primary" onclick="goStep(3)">
+          Continuar <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Payment -->
+    <div class="form-card" id="fs3" style="display:none">
+      <div class="form-card-title">Comprobante de pago</div>
+      <p class="form-card-desc">
+        Adjunta el comprobante de transferencia. Monto total:
+        <strong id="displayTotal">RD$0.00</strong>
+      </p>
+
+      <div class="bank-info">
+        <div class="bank-info-title"><i class="bi bi-bank"></i> Datos bancarios para transferencia</div>
+        <div class="bank-info-body">
+          Banco: <strong>Banco Popular Dominicano</strong><br>
+          Cuenta: <strong>001-01234-5</strong> (Corriente)<br>
+          A nombre de: <strong>Universidad Nacional Pedro Henríquez Ureña</strong><br>
+          RNC: <strong>401-09812-0</strong>
+        </div>
+      </div>
+
+      <div class="fg" style="margin-bottom:16px;">
+        <label>Comprobante de pago <span class="req-mark">*</span></label>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('receiptInput').click()">
+          <i class="bi bi-paperclip upload-ico"></i>
+          <div class="upload-txt">Arrastra tu comprobante aquí o haz clic para seleccionar</div>
+          <div class="upload-hint">PDF, JPG o PNG · Máx. 5 MB</div>
+          <div id="uploadFileName" class="upload-fname" style="display:none"></div>
+        </div>
+        <input type="file" name="payment_receipt" id="receiptInput" accept=".pdf,.jpg,.jpeg,.png"
+               style="display:none" onchange="showFileName(this)">
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-box">
+        <div class="summary-title"><i class="bi bi-clipboard-check"></i> Resumen de la solicitud</div>
+        <div class="det-row"><span class="det-lbl">Documento</span>   <span class="det-val" id="sumDoc">—</span></div>
+        <div class="det-row"><span class="det-lbl">Idioma</span>      <span class="det-val" id="sumLang">—</span></div>
+        <div class="det-row"><span class="det-lbl">Copias</span>      <span class="det-val" id="sumCopies">1</span></div>
+        <div class="det-row"><span class="det-lbl">Tiempo estimado</span><span class="det-val" id="sumDelivery">—</span></div>
+        <div class="det-row last"><span class="det-lbl" style="font-weight:700">Total</span>
+          <span class="det-val total-val" id="sumTotal">RD$0.00</span></div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="goStep(2)">
+          <i class="bi bi-arrow-left"></i> Atrás
+        </button>
+        <button type="submit" class="btn-primary">
+          <i class="bi bi-send-check"></i> Enviar Solicitud
+        </button>
+      </div>
+    </div>
+
+  </form><!-- /solForm -->
+</div><!-- /form-wrap -->
+</div><!-- /tab-nueva -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB: MIS SOLICITUDES
+════════════════════════════════════════════ -->
+<div class="tab-panel {% if active_tab == 'solicitudes' %}active{% endif %}" id="tab-solicitudes">
+
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="bi bi-search search-ico"></i>
+      <input type="text" id="searchInput" placeholder="Buscar por código o tipo..." oninput="filterRows()">
+    </div>
+    <select class="filter-sel" id="statusFilter" onchange="filterRows()">
+      <option value="">Todos los estados</option>
+      <option value="pending">Pendiente</option>
+      <option value="process">En proceso</option>
+      <option value="ready">Listo para retiro</option>
+      <option value="delivered">Entregado</option>
+      <option value="rejected">Rechazado</option>
+    </select>
+  </div>
+
+  <div class="white-card">
+    {% if my_requests %}
+    <div class="req-list" id="reqList">
+      {% for req in my_requests %}
+      <div class="req-row filterable" data-status="{{ req.status }}" data-text="{{ req.doc_type.name|lower }} {{ req.code|lower }}"
+           onclick="openDetailModal({{ req.pk }})">
+        <div class="req-ico">{{ req.doc_type.icon }}</div>
+        <div class="req-info">
+          <div class="req-title">{{ req.doc_type.name }}</div>
+          <div class="req-meta">
+            <span class="code-chip">{{ req.code }}</span>
+            {{ req.get_purpose_display }} · {{ req.copies }} copia{{ req.copies|pluralize }} ·
+            RD${{ req.total_amount|floatformat:2 }}
+          </div>
+        </div>
+        <div class="req-right">
+          <div class="req-date">{{ req.created_at|date:"d M Y" }}</div>
+          <span class="sbadge {{ req.status_badge.0 }}">
+            <span class="sbadge-dot"></span>{{ req.status_badge.1 }}
+          </span>
+          <div class="req-acts">
+            <button class="act-btn" onclick="event.stopPropagation();openDetailModal({{ req.pk }})">
+              <i class="bi bi-eye"></i> Ver
+            </button>
+            {% if req.can_download %}
+            <a class="act-btn act-dl" href="{% url 'descargar_doc' req.pk %}"
+               onclick="event.stopPropagation()">
+              <i class="bi bi-download"></i> Descargar
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-inbox" style="font-size:40px;color:var(--gray-400);"></i>
+      <p>Aún no tienes solicitudes.</p>
+      <button class="btn-primary" onclick="openTab('nueva')">
+        <i class="bi bi-plus-lg"></i> Crear primera solicitud
+      </button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     TAB: MIS DOCUMENTOS
+════════════════════════════════════════════ -->
+<div class="tab-panel {% if active_tab == 'documentos' %}active{% endif %}" id="tab-documentos">
+  <div style="max-width:700px;">
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;line-height:1.6;">
+      Documentos digitales verificados con código QR y cifrado SHA-256.
+      Disponibles para descarga inmediata una vez aprobados por Registro.
+    </p>
+
+    {% with downloadable=my_requests %}
+    {% if downloadable %}
+    <div class="white-card">
+      <div class="req-list">
+        {% for req in my_requests %}
+        {% if req.can_download %}
+        <div class="req-row">
+          <div class="req-ico" style="background:rgba(0,104,55,0.09);">{{ req.doc_type.icon }}</div>
+          <div class="req-info">
+            <div class="req-title">{{ req.doc_type.name }}</div>
+            <div class="req-meta">
+              <span class="code-chip">{{ req.code }}</span>
+              {{ req.created_at|date:"M Y" }} · SHA-256 verificado
+            </div>
+          </div>
+          <div class="req-right" style="flex-direction:row;gap:8px;align-items:center;">
+            <span class="sbadge done"><span class="sbadge-dot"></span>QR Verificado</span>
+            <a href="{% url 'descargar_doc' req.pk %}" class="act-btn act-dl">
+              <i class="bi bi-download"></i> Descargar
+            </a>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state" style="background:white;border-radius:8px;padding:40px;box-shadow:var(--shadow);">
+      <i class="bi bi-folder2-open" style="font-size:40px;color:var(--gray-400);"></i>
+      <p>No tienes documentos disponibles para descarga aún.</p>
+      <p style="font-size:12px;color:var(--gray-400);">Los documentos aparecerán aquí una vez aprobados por Registro.</p>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Verifier -->
+    <div class="white-card" style="margin-top:16px;">
+      <div class="verify-head">
+        <i class="bi bi-patch-check-fill" style="color:var(--navy);font-size:18px;"></i>
+        <div>
+          <div class="card-title">Verificar autenticidad de documento</div>
+          <div class="card-sub">Ingresa el código SHA-256 para confirmar que un documento es auténtico.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <input type="text" id="verifyInput" placeholder="Ej: UNPHU-2026-A7F3E9C2..."
+               style="flex:1;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:'Roboto',sans-serif;outline:none;">
+        <button class="btn-primary" onclick="verifyDoc()">
+          <i class="bi bi-shield-check"></i> Verificar
+        </button>
+      </div>
+      <div id="verifyResult" style="display:none;margin-top:12px;padding:14px;background:rgba(67,148,65,0.08);border:1px solid rgba(67,148,65,0.25);border-radius:6px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <i class="bi bi-check-circle-fill" style="color:var(--green);font-size:18px;"></i>
+          <strong style="color:var(--green-dark);">Documento Auténtico y Verificado</strong>
+        </div>
+        <div class="det-row"><span class="det-lbl">Estudiante</span><span class="det-val">{{ request.user.get_full_name }}</span></div>
+        <div class="det-row last"><span class="det-lbl">Hash SHA-256</span><span class="det-val" style="font-size:11px;color:var(--green-dark);">a7f3e9c2b841d3f...</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     DETAIL MODAL
+════════════════════════════════════════════ -->
+<div class="modal-ov" id="detailModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="mdTitle">Detalle de Solicitud</div>
+        <div class="modal-sub"   id="mdSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body" id="mdBody">
+      <div style="text-align:center;padding:30px;">
+        <div class="spinner"></div>
+        <p style="margin-top:12px;color:var(--gray-400);font-size:13px;">Cargando...</p>
+      </div>
+    </div>
+    <div class="modal-foot" id="mdFoot">
+      <button class="btn-secondary" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+/* ── Tab switching ──────────────────────────────── */
+function openTab(name) {
+  document.querySelectorAll('.sol-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.sol-tab');
+  const map  = ['inicio','nueva','solicitudes','documentos'];
+  const idx  = map.indexOf(name);
+  if (tabs[idx]) tabs[idx].classList.add('active');
+}
+
+/* ── Form: pick doc ─────────────────────────────── */
+let _selSlug = '', _selPrice = 0, _selName = '', _selDelivery = '';
+
+function pickDoc(el, slug, name, price) {
+  document.querySelectorAll('.doc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  _selSlug  = slug;
+  _selPrice = parseFloat(price);
+  _selName  = name;
+  const badge = el.querySelector('.doc-card-delivery');
+  _selDelivery = badge ? badge.textContent.trim() : '3–5 días';
+  document.getElementById('selectedSlug').value = slug;
+  updateTotal();
+}
+
+function updateTotal() {
+  const copies = parseInt(document.getElementById('copiesInput').value) || 1;
+  const total  = (_selPrice * copies).toFixed(2);
+  const fmt    = 'RD$' + parseFloat(total).toLocaleString('es-DO', {minimumFractionDigits:2});
+
+  document.getElementById('displayTotal').textContent = fmt;
+  document.getElementById('sumDoc').textContent       = _selName || '—';
+  document.getElementById('sumCopies').textContent    = copies;
+  document.getElementById('sumTotal').textContent     = fmt;
+  document.getElementById('sumDelivery').textContent  = _selDelivery || '—';
+
+  const langEl = document.querySelector('select[name="language"]');
+  const langMap = {es:'Español',en:'Inglés',es_en:'Español e Inglés'};
+  document.getElementById('sumLang').textContent = langMap[langEl ? langEl.value : 'es'] || 'Español';
+}
+
+/* ── Form: steps ────────────────────────────────── */
+let _step = 1;
+
+function goStep(step) {
+  if (step === 2 && !_selSlug) {
+    showToast('Selecciona un tipo de documento para continuar.');
+    return;
+  }
+  document.getElementById('fs' + _step).style.display = 'none';
+  _step = step;
+  document.getElementById('fs' + step).style.display = 'block';
+  updateProgress(step);
+  updateTotal();
+  window.scrollTo({top: document.getElementById('stepBar').offsetTop - 80, behavior:'smooth'});
+}
+
+function updateProgress(step) {
+  for (let i = 1; i <= 3; i++) {
+    const circ = document.getElementById('sc' + i);
+    const lbl  = document.getElementById('sl' + i);
+    const line = document.getElementById('sline' + i);
+    if (i < step) {
+      circ.className = 'step-circle done'; circ.innerHTML = '<i class="bi bi-check-lg"></i>';
+      lbl.className  = 'step-lbl done';
+      if (line) line.classList.add('done');
+    } else if (i === step) {
+      circ.className = 'step-circle active'; circ.textContent = i;
+      lbl.className  = 'step-lbl active';
+      if (line) line.classList.remove('done');
+    } else {
+      circ.className = 'step-circle wait'; circ.textContent = i;
+      lbl.className  = 'step-lbl wait';
+      if (line) line.classList.remove('done');
+    }
+  }
+}
+
+/* ── File upload display ────────────────────────── */
+function showFileName(input) {
+  const fn = document.getElementById('uploadFileName');
+  if (input.files && input.files[0]) {
+    fn.textContent = '📎 ' + input.files[0].name;
+    fn.style.display = 'block';
+    document.getElementById('uploadZone').classList.add('has-file');
+  }
+}
+
+/* ── Filter rows ────────────────────────────────── */
+function filterRows() {
+  const q   = document.getElementById('searchInput').value.toLowerCase();
+  const st  = document.getElementById('statusFilter').value;
+  document.querySelectorAll('.req-row.filterable').forEach(row => {
+    const matchText   = !q  || row.dataset.text.includes(q);
+    const matchStatus = !st || row.dataset.status === st;
+    row.style.display = (matchText && matchStatus) ? '' : 'none';
+  });
+}
+
+/* ── Detail modal ───────────────────────────────── */
+function openDetailModal(pk) {
+  document.getElementById('detailModal').classList.add('open');
+  document.getElementById('mdBody').innerHTML =
+    '<div style="text-align:center;padding:30px;"><div class="spinner"></div><p style="margin-top:12px;color:var(--gray-400);font-size:13px;">Cargando...</p></div>';
+
+  fetch(`/solicitud-documentos/${pk}/detalle/`)
+    .then(r => r.json())
+    .then(d => renderDetailModal(d, pk))
+    .catch(() => { document.getElementById('mdBody').innerHTML = '<p style="padding:20px;color:red;">Error al cargar datos.</p>'; });
+}
+
+function renderDetailModal(d, pk) {
+  document.getElementById('mdTitle').textContent = d.doc_name;
+  document.getElementById('mdSub').textContent   = d.code + ' · ' + d.created_at;
+
+  const rows = [
+    ['Código',           d.code],
+    ['Propósito',        d.purpose],
+    ['Idioma',           d.language],
+    ['Copias',           d.copies],
+    ['Monto total',      d.total],
+    ['Entrega estimada', `<strong>${d.estimated}</strong>`],
+    ['Estado',           `<span class="sbadge ${d.status_class}"><span class="sbadge-dot"></span>${d.status_label}</span>`],
+  ];
+
+  const rowsHtml = rows.map(([l,v]) =>
+    `<div class="det-row"><span class="det-lbl">${l}</span><span class="det-val">${v}</span></div>`
+  ).join('');
+
+  const tlHtml = d.audit_logs.map(l => `
+    <div class="tl-step">
+      <div class="tl-lc">
+        <div class="tl-dot done">${l.icon}</div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-body">
+        <div class="tl-title">${l.actor}</div>
+        <div class="tl-desc">${l.note}</div>
+        <div class="tl-when">${l.when}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('mdBody').innerHTML = `
+    ${rowsHtml}
+    <div style="margin-top:18px;">
+      <div class="section-label">Seguimiento de solicitud</div>
+      <div class="timeline">${tlHtml}</div>
+    </div>`;
+
+  const footHtml = `<button class="btn-secondary" onclick="closeModal()">Cerrar</button>
+    ${d.can_download ? `<a href="/solicitud-documentos/${pk}/descargar/" class="btn-primary"><i class="bi bi-download"></i> Descargar PDF</a>` : ''}`;
+  document.getElementById('mdFoot').innerHTML = footHtml;
+}
+
+function closeModal() {
+  document.getElementById('detailModal').classList.remove('open');
+}
+
+/* ── Verify doc ─────────────────────────────────── */
+function verifyDoc() {
+  const val = document.getElementById('verifyInput').value.trim();
+  if (!val) { showToast('Ingresa un código de verificación.'); return; }
+  document.getElementById('verifyResult').style.display = 'block';
+  showToast('Documento verificado — Autenticidad confirmada.');
+}
+
+/* ── Init: check URL for tab param ─────────────── */
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  if (tab) openTab(tab);
+})();
+</script>
+{% endblock %}

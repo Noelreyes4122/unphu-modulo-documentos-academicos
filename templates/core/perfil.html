@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Perfil — UNPHU SIST{% endblock %}
+
+{% block content %}
+<div class="perfil-grid">
+
+  <!-- Left card -->
+  <div class="white-card perfil-left">
+    <div class="perfil-mat">Matricula : {{ request.user.matricula|default:"—" }}</div>
+
+    <div class="perfil-av">{{ request.user.initials }}</div>
+
+    <div class="perfil-name">
+      {{ request.user.first_name }}<br>
+      {{ request.user.last_name }}
+    </div>
+
+    <button class="perfil-qr-btn" onclick="showToast('Generando código QR estudiantil...')">
+      <i class="bi bi-qr-code"></i> VER CODIGO QR
+    </button>
+
+    <div class="perfil-info-row">
+      <i class="bi bi-mortarboard perfil-info-ico"></i>
+      <div>
+        <div class="perfil-info-label">Carrera:</div>
+        <div class="perfil-info-val">
+          {{ request.user.carrera_codigo|default:"" }}
+          {% if request.user.carrera_codigo and request.user.carrera %}-{% endif %}
+          {{ request.user.carrera|default:"—" }}
+        </div>
+      </div>
+    </div>
+
+    <div class="perfil-info-row" style="margin-top:10px">
+      <i class="bi bi-envelope perfil-info-ico"></i>
+      <div>
+        <div class="perfil-info-label">Correo Institucional:</div>
+        <div class="perfil-info-val">{{ request.user.correo_institucional|default:"—" }}</div>
+      </div>
+    </div>
+
+    <div class="perfil-info-row" style="margin-top:10px">
+      <i class="bi bi-calendar3 perfil-info-ico"></i>
+      <div>
+        <div class="perfil-info-label">Período Activo:</div>
+        <div class="perfil-info-val">{{ request.user.periodo_label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div class="perfil-right">
+
+    <!-- Otras informaciones -->
+    <div class="white-card info-panel">
+      <div class="panel-title">Otras Informaciones</div>
+      <div class="otras-grid">
+        <div class="otras-item">
+          <div class="otras-label"><i class="bi bi-at"></i> Correo Personal:</div>
+          <div class="otras-val">{{ request.user.correo_personal|default:"—" }}</div>
+        </div>
+        <div class="otras-item">
+          <div class="otras-label"><i class="bi bi-telephone"></i> Teléfono:</div>
+          <div class="otras-val">{{ request.user.telefono|default:"—" }}</div>
+        </div>
+        <div class="otras-item">
+          <div class="otras-label"><i class="bi bi-phone"></i> Celular:</div>
+          <div class="otras-val">{{ request.user.celular|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control de comprobante fiscal -->
+    <div class="white-card info-panel">
+      <div class="panel-title">Control de comprobante fiscal</div>
+      <table class="simple-table">
+        <thead>
+          <tr>
+            <th>RNC <i class="bi bi-arrow-up" style="font-size:10px"></i></th>
+            <th>Tipo de comprobante fiscal</th>
+            <th><button class="btn-por-defecto">Por Defecto</button></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" class="empty-td">No se encontraron registros...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Quick access to Solicitud de Documentos -->
+    <div class="white-card info-panel sol-promo">
+      <div class="sol-promo-inner">
+        <div class="sol-promo-icon"><i class="bi bi-file-earmark-text"></i></div>
+        <div>
+          <div class="sol-promo-title">Solicitud de Documentos</div>
+          <div class="sol-promo-sub">
+            Solicita tu Carta Universitaria, Récord de Notas y más.<br>
+            Entrega el <strong>mismo día</strong> para ciertos documentos.
+          </div>
+        </div>
+        <a href="{% url 'solicitud_docs' %}" class="btn-primary" style="margin-left:auto;white-space:nowrap;">
+          <i class="bi bi-arrow-right-circle"></i> Ir al módulo
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="showToast('Nueva acción disponible')">
+  <i class="bi bi-plus-lg"></i>
+</button>
+{% endblock %}

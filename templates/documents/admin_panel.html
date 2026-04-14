@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% block title %}Panel Administrativo — UNPHU SIST{% endblock %}
+
+{% block content %}
+<div class="mod-header">
+  <div>
+    <div class="mod-title"><i class="bi bi-shield-check" style="color:var(--navy);margin-right:8px;"></i>Panel Administrativo</div>
+    <div class="mod-sub">Sesión: {{ request.user.get_full_name }}{% if request.user.cargo %} — {{ request.user.cargo }}{% endif %}</div>
+  </div>
+  <button class="btn-secondary" onclick="showToast('Exportando reporte...')">
+    <i class="bi bi-file-earmark-excel"></i> Exportar
+  </button>
+</div>
+
+<!-- Stats -->
+<div class="stats-row" style="margin-bottom:20px;">
+  <div class="stat-card s-orange">
+    <div class="stat-ico"><i class="bi bi-hourglass-split"></i></div>
+    <div class="stat-val">{{ counts.pending }}</div>
+    <div class="stat-lbl">Pendientes</div>
+  </div>
+  <div class="stat-card s-green">
+    <div class="stat-ico"><i class="bi bi-check-circle"></i></div>
+    <div class="stat-val">{{ counts.approved }}</div>
+    <div class="stat-lbl">Aprobadas</div>
+  </div>
+  <div class="stat-card s-red">
+    <div class="stat-ico"><i class="bi bi-x-circle"></i></div>
+    <div class="stat-val">{{ counts.rejected }}</div>
+    <div class="stat-lbl">Rechazadas</div>
+  </div>
+  <div class="stat-card s-navy">
+    <div class="stat-ico"><i class="bi bi-clipboard-data"></i></div>
+    <div class="stat-val">{{ counts.total }}</div>
+    <div class="stat-lbl">Total Registros</div>
+  </div>
+</div>
+
+<!-- Search bar -->
+<form method="GET" class="filter-bar" style="margin-bottom:16px;">
+  <div class="search-wrap">
+    <i class="bi bi-search search-ico"></i>
+    <input type="text" name="q" value="{{ search_q }}" placeholder="Buscar por código, nombre, matrícula...">
+  </div>
+  <input type="hidden" name="status" value="{{ status_filter }}">
+  <button type="submit" class="btn-primary" style="padding:8px 16px;">Buscar</button>
+  {% if search_q %}
+  <a href="{% url 'admin_panel' %}?status={{ status_filter }}" class="btn-secondary" style="padding:8px 16px;">Limpiar</a>
+  {% endif %}
+</form>
+
+<!-- Status tabs -->
+<div class="admin-tabs">
+  <a href="?status=pending{% if search_q %}&q={{ search_q }}{% endif %}"
+     class="admin-tab {% if status_filter == 'pending' %}active{% endif %}">
+    Pendientes
+    <span class="tab-badge" style="{% if status_filter == 'pending' %}background:var(--navy);color:white;{% endif %}">{{ counts.pending }}</span>
+  </a>
+  <a href="?status=approved{% if search_q %}&q={{ search_q }}{% endif %}"
+     class="admin-tab {% if status_filter == 'approved' %}active{% endif %}">
+    Aprobadas
+    <span class="tab-badge gray">{{ counts.approved }}</span>
+  </a>
+  <a href="?status=rejected{% if search_q %}&q={{ search_q }}{% endif %}"
+     class="admin-tab {% if status_filter == 'rejected' %}active{% endif %}">
+    Rechazadas
+    <span class="tab-badge red">{{ counts.rejected }}</span>
+  </a>
+</div>
+
+<!-- Request cards -->
+<div id="reqContainer">
+{% if requests %}
+  {% for req in requests %}
+  <div class="adm-card {% if req.status == 'approved' or req.status == 'ready' %}adm-approved{% elif req.status == 'rejected' %}adm-rejected{% elif req.status == 'process' %}adm-process{% endif %}"
+       id="arc-{{ req.pk }}">
+    <div class="adm-av">{{ req.student.initials }}</div>
+    <div class="adm-info">
+      <div class="adm-name">{{ req.student.get_full_name }}</div>
+      <div class="adm-doc">
+        {{ req.doc_type.icon }} {{ req.doc_type.name }} ·
+        {{ req.copies }} copia{{ req.copies|pluralize }} · {{ req.get_language_display }}
+      </div>
+      <div class="adm-meta">
+        <span class="code-chip">{{ req.code }}</span>
+        <span><i class="bi bi-calendar3"></i> {{ req.created_at|date:"d/m/Y H:i" }}</span>
+        <span><i class="bi bi-bullseye"></i> {{ req.get_purpose_display }}</span>
+        <span class="adm-amount"><i class="bi bi-cash-coin"></i> RD${{ req.total_amount|floatformat:2 }}</span>
+        <span><i class="bi bi-clock"></i> Entrega: <strong>{{ req.estimated_date_display }}</strong></span>
+      </div>
+
+      <!-- Audit trail (collapsed by default) -->
+      <div class="audit-trail">
+        <div class="audit-title" onclick="toggleAudit(this)">
+          <i class="bi bi-list-check"></i> Trazabilidad
+          <i class="bi bi-chevron-down audit-arrow"></i>
+        </div>
+        <div class="audit-body" style="display:none;">
+          {% for log in req.audit_logs.all %}
+          <div class="audit-entry">
+            <div class="audit-dot">{{ log.icon }}</div>
+            <div>
+              <div class="audit-note"><strong>{{ log.actor }}</strong> — {{ log.note }}</div>
+              <div class="audit-when">{{ log.created_at|date:"d/m/Y h:i A" }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-actions">
+      <span class="sbadge {{ req.status_badge.0 }}">
+        <span class="sbadge-dot"></span>{{ req.status_badge.1 }}
+      </span>
+      <button class="act-btn" onclick="openAdmDetail({{ req.pk }})">
+        <i class="bi bi-eye"></i> Ver
+      </button>
+      {% if req.status == 'pending' or req.status == 'process' %}
+      <button class="act-btn act-process" onclick="marcarProceso({{ req.pk }}, this)">
+        <i class="bi bi-gear"></i> En Proceso
+      </button>
+      <button class="act-btn act-approve" onclick="aprobar({{ req.pk }}, this)">
+        <i class="bi bi-check-lg"></i> Aprobar
+      </button>
+      <button class="act-btn act-reject" onclick="openReject({{ req.pk }})">
+        <i class="bi bi-x-lg"></i> Rechazar
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state" style="background:white;border-radius:8px;padding:40px;box-shadow:var(--shadow);margin-top:4px;">
+    <i class="bi bi-inbox" style="font-size:40px;color:var(--gray-400);"></i>
+    <p>No hay solicitudes en esta categoría.</p>
+  </div>
+{% endif %}
+</div>
+
+
+<!-- Admin Detail Modal -->
+<div class="modal-ov" id="admDetailModal" onclick="if(event.target===this)closeAdmModal()">
+  <div class="modal-box" style="max-width:620px;">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="admMdTitle">Detalle</div>
+        <div class="modal-sub"   id="admMdSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeAdmModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body" id="admMdBody"></div>
+    <div class="modal-foot" id="admMdFoot">
+      <button class="btn-secondary" onclick="closeAdmModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-ov" id="rejectModal" onclick="if(event.target===this)closeReject()">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Rechazar solicitud</div>
+        <div class="modal-sub" id="rejectSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeReject()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;">
+        El estudiante recibirá una notificación con el motivo del rechazo para corregir su solicitud.
+      </p>
+      <div class="reject-reasons" id="rejectReasons">
+        {% for r in reject_reasons %}
+        <label class="rr-option" onclick="selectReason(this)">
+          <input type="radio" name="rejectReason" value="{{ r }}"> {{ r }}
+        </label>
+        {% endfor %}
+      </div>
+      <div class="fg" style="margin-top:12px;">
+        <label>Observaciones adicionales (opcional)</label>
+        <textarea id="rejectObs" placeholder="Agrega detalles para ayudar al estudiante..." style="min-height:65px;width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:'Roboto',sans-serif;resize:vertical;outline:none;"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeReject()">Cancelar</button>
+      <button class="btn-danger"    onclick="confirmarRechazo()">
+        <i class="bi bi-x-circle"></i> Confirmar rechazo
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+const CSRF = '{{ csrf_token }}';
+let _rejectPk = null;
+
+/* ── Audit trail toggle ─────────────────── */
+function toggleAudit(el) {
+  const body  = el.nextElementSibling;
+  const arrow = el.querySelector('.audit-arrow');
+  const open  = body.style.display !== 'none';
+  body.style.display  = open ? 'none' : 'block';
+  arrow.className = open ? 'bi bi-chevron-down audit-arrow' : 'bi bi-chevron-up audit-arrow';
+}
+
+/* ── Status actions ─────────────────────── */
+function post(url, data, cb) {
+  const fd = new FormData();
+  fd.append('csrfmiddlewaretoken', CSRF);
+  Object.entries(data).forEach(([k,v]) => fd.append(k, v));
+  fetch(url, {method:'POST', body:fd})
+    .then(r => r.json()).then(cb)
+    .catch(() => showToast('Error de red. Intenta de nuevo.'));
+}
+
+function marcarProceso(pk, btn) {
+  btn.disabled = true;
+  post(`/admin-panel/${pk}/proceso/`, {}, d => {
+    if (d.status === 'ok') {
+      updateCardBadge(pk, d);
+      showToast('Solicitud marcada como En Revisión.');
+    }
+  });
+}
+
+function aprobar(pk, btn) {
+  btn.disabled = true;
+  post(`/admin-panel/${pk}/aprobar/`, {}, d => {
+    if (d.status === 'ok') {
+      updateCardBadge(pk, d);
+      showToast('✅ Solicitud aprobada. Estudiante notificado.');
+      setTimeout(() => location.reload(), 1200);
+    }
+  });
+}
+
+function updateCardBadge(pk, d) {
+  const card  = document.getElementById('arc-' + pk);
+  if (!card) return;
+  const badge = card.querySelector('.sbadge');
+  if (badge) {
+    badge.className = 'sbadge ' + d.css;
+    badge.innerHTML = `<span class="sbadge-dot"></span>${d.label}`;
+  }
+}
+
+/* ── Reject modal ───────────────────────── */
+function openReject(pk) {
+  _rejectPk = pk;
+  document.querySelectorAll('.rr-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('rejectObs').value = '';
+  document.getElementById('rejectSub').textContent = 'ID: ' + pk;
+  document.getElementById('rejectModal').classList.add('open');
+}
+
+function selectReason(el) {
+  document.querySelectorAll('.rr-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function closeReject() {
+  document.getElementById('rejectModal').classList.remove('open');
+  _rejectPk = null;
+}
+
+function confirmarRechazo() {
+  const sel = document.querySelector('input[name="rejectReason"]:checked');
+  if (!sel) { showToast('Selecciona un motivo de rechazo.'); return; }
+  const obs = document.getElementById('rejectObs').value.trim();
+  post(`/admin-panel/${_rejectPk}/rechazar/`, {reason: sel.value, observations: obs}, d => {
+    if (d.status === 'ok') {
+      closeReject();
+      showToast('❌ Solicitud rechazada. Estudiante notificado.');
+      setTimeout(() => location.reload(), 1200);
+    }
+  });
+}
+
+/* ── Admin detail modal ─────────────────── */
+function openAdmDetail(pk) {
+  document.getElementById('admDetailModal').classList.add('open');
+  document.getElementById('admMdBody').innerHTML =
+    '<div style="text-align:center;padding:24px;"><div class="spinner"></div></div>';
+
+  fetch(`/admin-panel/${pk}/detalle/`)
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('admMdTitle').textContent = d.doc_name;
+      document.getElementById('admMdSub').textContent   = d.code + ' · ' + d.student;
+
+      const rows = [
+        ['Estudiante',    d.student],
+        ['Matrícula',     d.matricula],
+        ['Cédula',        d.cedula],
+        ['Carrera',       d.carrera],
+        ['Propósito',     d.purpose],
+        ['Idioma',        d.language],
+        ['Copias',        d.copies],
+        ['Institución',   d.institution || '—'],
+        ['Monto',         `<strong style="color:var(--green-dark)">${d.total}</strong>`],
+        ['Fecha',         d.created_at],
+        ['Entrega est.',  `<strong>${d.estimated}</strong>`],
+        ['Estado',        `<span class="sbadge ${d.status_class}"><span class="sbadge-dot"></span>${d.status_label}</span>`],
+      ];
+
+      const rowsHtml = rows.map(([l,v]) =>
+        `<div class="det-row"><span class="det-lbl">${l}</span><span class="det-val">${v}</span></div>`
+      ).join('');
+
+      const tlHtml = d.audit_logs.map(l => `
+        <div class="tl-step">
+          <div class="tl-lc">
+            <div class="tl-dot done">${l.icon}</div>
+            <div class="tl-line"></div>
+          </div>
+          <div class="tl-body">
+            <div class="tl-title">${l.actor}</div>
+            <div class="tl-desc">${l.note}</div>
+            <div class="tl-when">${l.when}</div>
+          </div>
+        </div>`).join('');
+
+      document.getElementById('admMdBody').innerHTML = `
+        ${rowsHtml}
+        ${d.admin_notes ? `<div style="margin-top:12px;padding:10px 12px;background:rgba(229,62,62,0.06);border-radius:6px;font-size:12.5px;color:var(--reject);"><strong>Motivo de rechazo:</strong> ${d.admin_notes}</div>` : ''}
+        <div style="margin-top:16px;">
+          <div class="section-label">Trazabilidad</div>
+          <div class="timeline">${tlHtml}</div>
+        </div>`;
+
+      const actionBtns = (d.status === 'pending' || d.status === 'process') ? `
+        <button class="btn-primary" onclick="closeAdmModal();aprobar(${pk},this)" style="font-size:12px;padding:8px 14px;">
+          <i class="bi bi-check-lg"></i> Aprobar
+        </button>
+        <button class="btn-danger" onclick="closeAdmModal();openReject(${pk})" style="font-size:12px;padding:8px 14px;">
+          <i class="bi bi-x-lg"></i> Rechazar
+        </button>` : '';
+
+      document.getElementById('admMdFoot').innerHTML =
+        `<button class="btn-secondary" onclick="closeAdmModal()">Cerrar</button>${actionBtns}`;
+    });
+}
+
+function closeAdmModal() {
+  document.getElementById('admDetailModal').classList.remove('open');
+}
+</script>
+{% endblock %}

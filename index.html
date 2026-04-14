@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNPHU SIST – Sistema Estudiantil</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   UNPHU BRAND — Manual de Identidad Visual 2020
+════════════════════════════════════════════ */
+:root {
+  --unphu-green:        #439441;
+  --unphu-green-dark:   #006837;
+  --unphu-green-light:  #8CC63E;
+  --unphu-navy:         #003E7E;
+  --unphu-navy-dark:    #0F2D4F;
+  --unphu-teal:         #1A4B6E;
+  --unphu-gray:         #9A999E;
+  --unphu-gray-light:   #F0F2F5;
+  --unphu-gray-mid:     #E3E8EE;
+  --white:              #FFFFFF;
+  --text-dark:          #1A1A2E;
+  --text-mid:           #4A5568;
+  --text-light:         #718096;
+  --sidebar-width:      260px;
+  --topbar-height:      56px;
+  --radius:             8px;
+  --radius-sm:          5px;
+  --shadow:             0 2px 12px rgba(0,62,126,0.10);
+  --shadow-md:          0 4px 24px rgba(0,62,126,0.14);
+  /* Status colors */
+  --s-pending:  #F5A623;
+  --s-process:  #3182CE;
+  --s-ready:    #439441;
+  --s-done:     #006837;
+  --s-reject:   #E53E3E;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: var(--unphu-gray-light);
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ════════════════════════════════
+   TOP BAR  (matches screenshot)
+════════════════════════════════ */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-height);
+  background: linear-gradient(135deg, #0F2D4F 0%, #1A4B6E 60%, #1e5c82 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 0 0;
+  z-index: 300;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  width: var(--sidebar-width);
+  padding: 0 20px;
+  border-right: 1px solid rgba(255,255,255,0.10);
+  height: 100%;
+}
+
+.brand-logo-text {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+.brand-logo-text span {
+  color: var(--unphu-green-light);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: rgba(255,255,255,0.90);
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.user-pill:hover { background: rgba(255,255,255,0.08); }
+
+.user-pill-arrow {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  margin-left: 2px;
+}
+
+/* ════════════════════════════════
+   SIDEBAR
+════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  top: var(--topbar-height);
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--topbar-height));
+  background: var(--white);
+  border-right: 1px solid var(--unphu-gray-mid);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed { width: 56px; }
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--unphu-gray-mid); border-radius: 4px; }
+
+/* Nav items — matching screenshot style */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 20px;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+  position: relative;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(67,148,65,0.06);
+  color: var(--unphu-green-dark);
+  border-left-color: rgba(67,148,65,0.3);
+}
+
+.nav-item.active {
+  background: rgba(67,148,65,0.09);
+  color: var(--unphu-green-dark);
+  border-left-color: var(--unphu-green);
+  font-weight: 500;
+}
+
+.nav-item.highlight-new {
+  color: var(--unphu-navy);
+}
+
+.nav-item.highlight-new:hover,
+.nav-item.highlight-new.active {
+  background: rgba(0,62,126,0.07);
+  color: var(--unphu-navy);
+  border-left-color: var(--unphu-navy);
+}
+
+.nav-ico {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  color: var(--text-light);
+}
+
+.nav-item.active .nav-ico,
+.nav-item:hover .nav-ico { color: inherit; }
+
+.nav-label-text { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+
+.nav-ext-icon {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.nav-arrow {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.nav-badge-new {
+  background: var(--unphu-navy);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--unphu-gray-mid);
+  margin: 4px 0;
+}
+
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  transition: color 0.18s;
+  margin-top: auto;
+  border-top: 1px solid var(--unphu-gray-mid);
+}
+
+.sidebar-collapse-btn:hover { color: var(--text-mid); }
+
+/* ════════════════════════════════
+   MAIN CONTENT
+════════════════════════════════ */
+.main {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--topbar-height);
+  min-height: calc(100vh - var(--topbar-height));
+  transition: margin-left 0.3s ease;
+  padding: 24px;
+}
+
+.main.collapsed-margin { margin-left: 56px; }
+
+/* ════════════════════════════════
+   PAGES
+════════════════════════════════ */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ════════════════════════════════
+   PERFIL PAGE  (matches screenshot)
+════════════════════════════════ */
+.perfil-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  max-width: 1100px;
+}
+
+.perfil-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.perfil-mat {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.perfil-av {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #5A6A7E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  margin: 0 auto 14px;
+}
+
+.perfil-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--unphu-navy);
+  line-height: 1.4;
+}
+
+.perfil-qr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: var(--unphu-navy-dark);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 16px 0;
+  letter-spacing: 0.04em;
+  font-family: 'Roboto', sans-serif;
+}
+
+.perfil-qr-btn:hover { background: var(--unphu-navy); }
+
+.perfil-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  margin-top: 10px;
+  font-size: 12.5px;
+}
+
+.perfil-info-ico { font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+.perfil-info-label { font-weight: 600; color: var(--unphu-green-dark); font-size: 11.5px; }
+.perfil-info-val { color: var(--text-mid); }
+
+.info-panel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.info-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-panel-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 16px;
+  background: var(--unphu-navy);
+  border-radius: 2px;
+}
+
+.otras-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.otras-info-item { font-size: 12.5px; }
+.otras-info-item-ico { font-size: 14px; margin-right: 4px; }
+.otras-info-item-label { font-weight: 600; color: var(--text-mid); }
+.otras-info-item-val { color: var(--text-mid); margin-top: 2px; }
+
+.comprobante-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.comprobante-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--unphu-gray-mid);
+}
+
+.btn-por-defecto {
+  padding: 5px 14px;
+  background: var(--unphu-green);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-table-msg {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+.fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--unphu-navy);
+  color: white;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  transition: background 0.2s;
+}
+
+.fab:hover { background: var(--unphu-green-dark); }
+
+/* ════════════════════════════════
+   SOLICITUD DOCS — Module
+════════════════════════════════ */
+.sol-module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sol-module-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--unphu-navy);
+}
+
+.sol-module-sub {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.sol-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--unphu-gray-mid);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin-bottom: 24px;
+}
+
+.sol-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.sol-tab.active {
+  background: var(--white);
+  color: var(--unphu-navy);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+
+.sol-tab-panel { display: none; }
+.sol-tab-panel.active { display: block; }
+
+/* Stats cards */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid transparent;
+}
+
+.stat-card.s-navy  { border-left-color: var(--unphu-navy); }
+.stat-card.s-green { border-left-color: var(--unphu-green); }
+.stat-card.s-orange{ border-left-color: var(--s-pending); }
+.stat-card.s-blue  { border-left-color: var(--s-process); }
+
+.stat-val { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 800; color: var(--text-dark); }
+.stat-lbl { font-size: 11.5px; color: var(--text-light); margin-top: 2px; }
+
+/* Request list card */
+.content-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.content-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--unphu-gray-mid);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.content-card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.content-card-sub {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--unphu-navy);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover { background: var(--unphu-green-dark); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--white);
+  color: var(--text-mid);
+  border: 1px solid var(--unphu-gray-mid);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: var(--unphu-gray); color: var(--text-dark); }
+
+.btn-green {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--unphu-green);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: background 0.2s;
+}
+
+.btn-green:hover { background: var(--unphu-green-dark); }
+
+/* Request row list */
+.req-list { padding: 0; }
+
+.req-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--unphu-gray-mid);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.req-row:last-child { border-bottom: none; }
+.req-row:hover { background: var(--unphu-gray-light); }
+
+.req-row-ico {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--unphu-gray-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.req-row-info { flex: 1; min-width: 0; }
+
+.req-row-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.req-row-meta {
+  font-size: 11.5px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.req-row-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.req-row-date { font-size: 11.5px; color: var(--text-light); margin-bottom: 4px; }
+
+/* Status badges */
+.sbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sbadge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+
+.sbadge.pending  { background: rgba(245,166,35,0.12);  color: #B7791F; }
+.sbadge.pending .sbadge-dot  { background: #F5A623; }
+.sbadge.process  { background: rgba(49,130,206,0.12);  color: var(--s-process); }
+.sbadge.process .sbadge-dot  { background: var(--s-process); }
+.sbadge.ready    { background: rgba(67,148,65,0.12);   color: var(--unphu-green-dark); }
+.sbadge.ready .sbadge-dot    { background: var(--unphu-green); }
+.sbadge.done     { background: rgba(0,104,55,0.10);    color: var(--unphu-green-dark); }
+.sbadge.done .sbadge-dot     { background: var(--unphu-green-dark); }
+.sbadge.reject   { background: rgba(229,62,62,0.10);   color: var(--s-reject); }
+.sbadge.reject .sbadge-dot   { background: var(--s-reject); }
+
+/* ════════════════════════════════
+   NUEVA SOLICITUD FORM
+════════════════════════════════ */
+.form-wrap { max-width: 780px; }
+
+.form-progress {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 20px 24px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.fp-step { display: flex; align-items: center; flex-direction: column; gap: 6px; }
+
+.fp-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.fp-circle.active  { background: var(--unphu-navy); color: white; }
+.fp-circle.done    { background: var(--unphu-green); color: white; }
+.fp-circle.waiting { background: var(--unphu-gray-mid); color: var(--text-light); }
+
+.fp-label { font-size: 11.5px; font-weight: 500; color: var(--text-light); }
+.fp-label.active  { color: var(--unphu-navy); font-weight: 600; }
+.fp-label.done    { color: var(--unphu-green-dark); }
+
+.fp-line {
+  flex: 1;
+  height: 2px;
+  background: var(--unphu-gray-mid);
+  margin: 0 10px;
+  margin-bottom: 22px;
+}
+
+.fp-line.done { background: var(--unphu-green); }
+
+.form-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  margin-bottom: 16px;
+}
+
+.form-card-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+
+.form-card-desc { font-size: 13px; color: var(--text-light); margin-bottom: 22px; line-height: 1.5; }
+
+/* Document picker grid */
+.doc-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.doc-pick-card {
+  border: 2px solid var(--unphu-gray-mid);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+
+.doc-pick-card:hover {
+  border-color: var(--unphu-navy);
+  background: rgba(0,62,126,0.03);
+}
+
+.doc-pick-card.selected {
+  border-color: var(--unphu-navy);
+  background: rgba(0,62,126,0.06);
+}
+
+.dpc-icon { font-size: 28px; margin-bottom: 8px; }
+.dpc-name { font-size: 12px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; }
+.dpc-price { font-size: 12px; color: var(--unphu-green-dark); font-weight: 700; }
+
+/* Form fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+
+.form-group label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--unphu-gray-mid);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-dark);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--unphu-navy);
+  box-shadow: 0 0 0 3px rgba(0,62,126,0.08);
+}
+
+.form-group input[readonly],
+.form-group select[readonly] {
+  background: var(--unphu-gray-light);
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+
+.form-group textarea { min-height: 80px; resize: vertical; }
+
+.req-mark { color: var(--s-reject); }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--unphu-gray-mid);
+}
+
+/* Payment info */
+.payment-info {
+  background: var(--unphu-gray-light);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 18px;
+  border-left: 3px solid var(--unphu-navy);
+}
+
+.payment-info-title { font-size: 12.5px; font-weight: 700; color: var(--unphu-navy); margin-bottom: 8px; }
+.payment-info-body  { font-size: 12.5px; color: var(--text-mid); line-height: 1.7; }
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed var(--unphu-gray-mid);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  margin-bottom: 16px;
+}
+
+.upload-zone:hover {
+  border-color: var(--unphu-navy);
+  background: rgba(0,62,126,0.02);
+}
+
+.upload-icon { font-size: 28px; margin-bottom: 8px; }
+.upload-txt  { font-size: 13px; color: var(--text-mid); font-weight: 500; }
+.upload-hint { font-size: 11.5px; color: var(--text-light); margin-top: 4px; }
+
+/* Summary */
+.summary-box {
+  background: var(--unphu-gray-light);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--unphu-gray-mid);
+  font-size: 13px;
+}
+
+.detail-row:last-child { border-bottom: none; }
+.det-label { color: var(--text-light); font-size: 12px; }
+.det-val   { color: var(--text-dark); font-weight: 500; }
+
+/* Success screen */
+.success-screen {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.success-ico {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--unphu-green);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-weight: 700;
+}
+
+.success-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.success-desc  { font-size: 13.5px; color: var(--text-light); line-height: 1.6; margin-bottom: 20px; }
+
+.req-code {
+  display: inline-block;
+  background: var(--unphu-gray-light);
+  border: 1px solid var(--unphu-gray-mid);
+  padding: 10px 24px;
+  border-radius: var(--radius);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--unphu-navy);
+  letter-spacing: 0.05em;
+}
+
+/* ════════════════════════════════
+   MIS SOLICITUDES
+════════════════════════════════ */
+.sol-filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--unphu-gray-mid);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-input-wrap input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-dark);
+  width: 100%;
+  background: transparent;
+}
+
+.filter-sel {
+  padding: 8px 12px;
+  border: 1px solid var(--unphu-gray-mid);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-mid);
+  background: var(--white);
+  outline: none;
+  cursor: pointer;
+}
+
+/* ════════════════════════════════
+   TRACKING TIMELINE
+════════════════════════════════ */
+.timeline { padding: 0; }
+
+.tl-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.tl-line-col { display: flex; flex-direction: column; align-items: center; }
+
+.tl-circle {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tl-circle.done    { background: var(--unphu-green); color: white; }
+.tl-circle.current { background: var(--s-pending); color: white; }
+.tl-circle.wait    { background: var(--unphu-gray-mid); color: var(--text-light); }
+
+.tl-connector {
+  width: 2px; flex: 1;
+  min-height: 22px; background: var(--unphu-gray-mid);
+  margin: 3px 0;
+}
+
+.tl-connector.done { background: var(--unphu-green); }
+
+.tl-body { padding-top: 2px; }
+.tl-title { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+.tl-desc  { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.tl-meta  { font-size: 11px; color: var(--unphu-gray); margin-top: 2px; }
+
+/* ════════════════════════════════
+   MODAL
+════════════════════════════════ */
+.modal-ov {
+  position: fixed; inset: 0;
+  background: rgba(15,45,79,0.50);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+}
+
+.modal-ov.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.95) translateY(10px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--unphu-gray-mid);
+}
+
+.modal-title { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-dark); }
+.modal-sub   { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+
+.modal-close {
+  background: none; border: none;
+  font-size: 16px; color: var(--text-light);
+  cursor: pointer; padding: 2px 6px;
+  border-radius: 4px; line-height: 1;
+  transition: color 0.15s;
+}
+
+.modal-close:hover { color: var(--text-dark); }
+.modal-body { padding: 20px 24px; }
+.modal-foot { padding: 14px 24px; border-top: 1px solid var(--unphu-gray-mid); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: -80px;
+  right: 24px;
+  background: var(--unphu-navy-dark);
+  color: white;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  box-shadow: var(--shadow-md);
+  z-index: 9999;
+  transition: bottom 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  min-width: 240px;
+  max-width: 340px;
+}
+
+.toast.show { bottom: 24px; }
+
+.toast-ico {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.toast strong { display: block; font-weight: 600; margin-bottom: 1px; }
+.toast small  { color: rgba(255,255,255,0.65); font-size: 12px; }
+
+/* ════════════════════════════════
+   FOOTER BAR
+════════════════════════════════ */
+.footer-bar {
+  background: var(--white);
+  border-top: 1px solid var(--unphu-gray-mid);
+  padding: 10px 24px;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s;
+}
+
+.footer-bar.collapsed-margin { margin-left: 56px; }
+
+/* ════════════════════════════════
+   RESPONSIVE
+════════════════════════════════ */
+@media (max-width: 900px) {
+  .perfil-grid        { grid-template-columns: 1fr; }
+  .doc-pick-grid      { grid-template-columns: repeat(2,1fr); }
+  .stats-row          { grid-template-columns: repeat(2,1fr); }
+  .otras-info-grid    { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .form-grid          { grid-template-columns: 1fr; }
+  .doc-pick-grid      { grid-template-columns: 1fr 1fr; }
+  .main               { padding: 14px; }
+  .sidebar            { width: 56px; }
+  .main               { margin-left: 56px; }
+  .footer-bar         { margin-left: 56px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="brand-logo-text">UNPHU<span>SIST</span></span>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill" onclick="showToast('👤','Perfil','Noel Reyes De la Cruz')">
+      Noel Reyes De la Cruz
+      <span class="user-pill-arrow">▼</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════ -->
+<nav class="sidebar" id="sidebar">
+
+  <a class="nav-item" onclick="showPage('perfil')">
+    <div class="nav-ico">👤</div>
+    <span class="nav-label-text">Perfil</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('📋','Selección','Módulo de selección de materias')">
+    <div class="nav-ico">☑</div>
+    <span class="nav-label-text">Selección</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('📚','Mi pensum','Cargando pensum académico...')">
+    <div class="nav-ico">👤</div>
+    <span class="nav-label-text">Mi pensum</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('📊','Historial','Cargando historial de calificaciones...')">
+    <div class="nav-ico">🔍</div>
+    <span class="nav-label-text">Historial de calificaciones</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('↩','Retiros','Módulo de retiros de materias')">
+    <div class="nav-ico">↩</div>
+    <span class="nav-label-text">Retiros</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('🧾','Recibos','Cargando recibos de pago...')">
+    <div class="nav-ico">🗒</div>
+    <span class="nav-label-text">Recibos</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('💳','Pago','Módulo de pagos en línea')">
+    <div class="nav-ico">💳</div>
+    <span class="nav-label-text">Pago</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('📈','Reportes','Selecciona un tipo de reporte')">
+    <div class="nav-ico">📊</div>
+    <span class="nav-label-text">Reportes</span>
+    <span class="nav-arrow">›</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('🎓','Solicitud de graduación','Módulo de graduación')">
+    <div class="nav-ico">🗒</div>
+    <span class="nav-label-text">Solicitud de graduación</span>
+  </a>
+
+  <div class="sidebar-divider"></div>
+
+  <!-- ★ NEW MODULE -->
+  <a class="nav-item highlight-new" id="nav-sol-docs" onclick="showPage('solicitud-documentos')">
+    <div class="nav-ico">📄</div>
+    <span class="nav-label-text">Solicitud de Documentos</span>
+    <span class="nav-badge-new">NUEVO</span>
+  </a>
+
+  <div class="sidebar-divider"></div>
+
+  <a class="nav-item" onclick="showToast('✅','Asistencia','Abriendo módulo de asistencia...')">
+    <div class="nav-ico">✅</div>
+    <span class="nav-label-text">Asistencia</span>
+    <span class="nav-ext-icon">↗</span>
+  </a>
+
+  <a class="nav-item" onclick="showToast('📅','Calendario','Abriendo calendario académico...')">
+    <div class="nav-ico">📅</div>
+    <span class="nav-label-text">Calendario Academico</span>
+    <span class="nav-ext-icon">↗</span>
+  </a>
+
+  <button class="sidebar-collapse-btn" onclick="toggleSidebar()">
+    <span id="collapse-icon">«</span>
+    <span class="nav-label-text" id="collapse-label">Ocultar menu</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════ -->
+<main class="main" id="main-content">
+
+  <!-- ══ PERFIL PAGE (default) ══ -->
+  <div class="page active" id="page-perfil">
+    <div class="perfil-grid">
+
+      <!-- Left card — student info -->
+      <div class="perfil-card">
+        <div class="perfil-mat">Matricula : 21-2021</div>
+        <div class="perfil-av">N</div>
+        <div class="perfil-name">Noel<br>Reyes de la Cruz</div>
+
+        <button class="perfil-qr-btn" onclick="showToast('📱','Código QR','Generando código QR estudiantil...')">
+          <span>⊞</span> VER CODIGO QR
+        </button>
+
+        <div class="perfil-info-row">
+          <span class="perfil-info-ico">🎓</span>
+          <div>
+            <div class="perfil-info-label">Carrera:</div>
+            <div class="perfil-info-val">255/2-22-22-Ingenieria en Sistemas Computacionales</div>
+          </div>
+        </div>
+
+        <div class="perfil-info-row" style="margin-top:8px">
+          <span class="perfil-info-ico">✉</span>
+          <div>
+            <div class="perfil-info-label">Correo Institucional:</div>
+            <div class="perfil-info-val">nr21-2021@unphu.edu.do</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panels -->
+      <div>
+        <div class="info-panel">
+          <div class="info-panel-title">Otras Informaciones</div>
+          <div class="otras-info-grid">
+            <div class="otras-info-item">
+              <div><span class="otras-info-item-ico">@</span><span class="otras-info-item-label">Correo Personal:</span></div>
+              <div class="otras-info-item-val">noelreyes426@gmail.com</div>
+            </div>
+            <div class="otras-info-item">
+              <div><span class="otras-info-item-ico">📞</span><span class="otras-info-item-label">Teléfono:</span></div>
+              <div class="otras-info-item-val">829-929-8388</div>
+            </div>
+            <div class="otras-info-item">
+              <div><span class="otras-info-item-ico">📱</span><span class="otras-info-item-label">Celular:</span></div>
+              <div class="otras-info-item-val">809-459-6174</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-panel-title">Control de comprobante fiscal</div>
+          <table class="comprobante-table">
+            <thead>
+              <tr>
+                <th>RNC ↑</th>
+                <th>Tipo de comprobante fiscal</th>
+                <th><button class="btn-por-defecto">Por Defecto</button></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="3"><div class="empty-table-msg">No se encontraron registros...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /perfil-grid -->
+    <button class="fab" onclick="showToast('➕','Acción','Nueva acción disponible')">+</button>
+  </div>
+
+
+  <!-- ══ SOLICITUD DE DOCUMENTOS ══ -->
+  <div class="page" id="page-solicitud-documentos">
+
+    <div class="sol-module-header">
+      <div>
+        <div class="sol-module-title">Solicitud de Documentos</div>
+        <div class="sol-module-sub">Gestión digital de documentos académicos · Matrícula 21-2021</div>
+      </div>
+      <button class="btn-primary" onclick="openNuevaSolicitud()">+ Nueva Solicitud</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="sol-tabs">
+      <div class="sol-tab active" id="stab-inicio"       onclick="switchSolTab('inicio')">Inicio</div>
+      <div class="sol-tab"        id="stab-nueva"        onclick="switchSolTab('nueva')">Nueva Solicitud</div>
+      <div class="sol-tab"        id="stab-solicitudes"  onclick="switchSolTab('solicitudes')">Mis Solicitudes</div>
+      <div class="sol-tab"        id="stab-documentos"   onclick="switchSolTab('documentos')">Mis Documentos</div>
+    </div>
+
+    <!-- ── TAB: INICIO ── -->
+    <div class="sol-tab-panel active" id="spanel-inicio">
+      <div class="stats-row">
+        <div class="stat-card s-navy">
+          <div class="stat-val">7</div>
+          <div class="stat-lbl">Total Solicitudes</div>
+        </div>
+        <div class="stat-card s-blue">
+          <div class="stat-val">3</div>
+          <div class="stat-lbl">En Proceso</div>
+        </div>
+        <div class="stat-card s-green">
+          <div class="stat-val">4</div>
+          <div class="stat-lbl">Completadas</div>
+        </div>
+        <div class="stat-card s-orange">
+          <div class="stat-val">1</div>
+          <div class="stat-lbl">Pendiente Pago</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start;">
+
+        <!-- Recent requests table -->
+        <div class="content-card">
+          <div class="content-card-header">
+            <div>
+              <div class="content-card-title">Solicitudes Recientes</div>
+              <div class="content-card-sub">Últimas 5 solicitudes realizadas</div>
+            </div>
+            <a style="font-size:12.5px;color:var(--unphu-navy);cursor:pointer;font-weight:500;" onclick="switchSolTab('solicitudes')">Ver todas →</a>
+          </div>
+          <div class="req-list">
+            <div class="req-row" onclick="openReqModal('r1')">
+              <div class="req-row-ico">📜</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Récord de Notas Oficial</div>
+                <div class="req-row-meta">SOL-2025-0142 · 1 copia · RD$850</div>
+              </div>
+              <div class="req-row-right">
+                <div class="req-row-date">12 Ene 2025</div>
+                <span class="sbadge process"><span class="sbadge-dot"></span>En proceso</span>
+              </div>
+            </div>
+            <div class="req-row" onclick="openReqModal('r2')">
+              <div class="req-row-ico">📋</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Constancia de Estudios</div>
+                <div class="req-row-meta">SOL-2025-0138 · 1 copia · RD$650</div>
+              </div>
+              <div class="req-row-right">
+                <div class="req-row-date">08 Ene 2025</div>
+                <span class="sbadge ready"><span class="sbadge-dot"></span>Listo para retiro</span>
+              </div>
+            </div>
+            <div class="req-row">
+              <div class="req-row-ico">🎓</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Cert. de Graduación</div>
+                <div class="req-row-meta">SOL-2024-0891 · 2 copias · RD$2,400</div>
+              </div>
+              <div class="req-row-right">
+                <div class="req-row-date">15 Nov 2024</div>
+                <span class="sbadge done"><span class="sbadge-dot"></span>Entregado</span>
+              </div>
+            </div>
+            <div class="req-row">
+              <div class="req-row-ico">📄</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Pensum Aprobado</div>
+                <div class="req-row-meta">SOL-2024-0867 · 1 copia · RD$500</div>
+              </div>
+              <div class="req-row-right">
+                <div class="req-row-date">01 Nov 2024</div>
+                <span class="sbadge done"><span class="sbadge-dot"></span>Entregado</span>
+              </div>
+            </div>
+            <div class="req-row">
+              <div class="req-row-ico">🏅</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Certificado de Conducta</div>
+                <div class="req-row-meta">SOL-2024-0844 · 1 copia · RD$450</div>
+              </div>
+              <div class="req-row-right">
+                <div class="req-row-date">20 Oct 2024</div>
+                <span class="sbadge pending"><span class="sbadge-dot"></span>Pendiente pago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: tracking + activity -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="content-card">
+            <div class="content-card-header">
+              <div>
+                <div class="content-card-title">Estado Actual</div>
+                <div class="content-card-sub">SOL-2025-0142 · Récord de Notas</div>
+              </div>
+              <span class="sbadge process"><span class="sbadge-dot"></span>En proceso</span>
+            </div>
+            <div style="padding:16px 20px;">
+              <div class="timeline">
+                <div class="tl-step">
+                  <div class="tl-line-col">
+                    <div class="tl-circle done">✓</div>
+                    <div class="tl-connector done"></div>
+                  </div>
+                  <div class="tl-body">
+                    <div class="tl-title">Solicitud recibida</div>
+                    <div class="tl-desc">Sistema procesó la solicitud</div>
+                    <div class="tl-meta">12/01/2025 · 10:34 AM</div>
+                  </div>
+                </div>
+                <div class="tl-step">
+                  <div class="tl-line-col">
+                    <div class="tl-circle done">✓</div>
+                    <div class="tl-connector done"></div>
+                  </div>
+                  <div class="tl-body">
+                    <div class="tl-title">Pago verificado</div>
+                    <div class="tl-desc">Comprobante aprobado</div>
+                    <div class="tl-meta">12/01/2025 · 11:05 AM</div>
+                  </div>
+                </div>
+                <div class="tl-step">
+                  <div class="tl-line-col">
+                    <div class="tl-circle current">▶</div>
+                    <div class="tl-connector"></div>
+                  </div>
+                  <div class="tl-body">
+                    <div class="tl-title" style="color:var(--s-pending)">En revisión académica</div>
+                    <div class="tl-desc">Registro está procesando</div>
+                    <div class="tl-meta">Tiempo estimado: 24–48h</div>
+                  </div>
+                </div>
+                <div class="tl-step">
+                  <div class="tl-line-col">
+                    <div class="tl-circle wait">4</div>
+                  </div>
+                  <div class="tl-body">
+                    <div class="tl-title" style="color:var(--unphu-gray)">Disponible para entrega</div>
+                    <div class="tl-desc" style="color:var(--unphu-gray)">Pendiente</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div class="content-card-header">
+              <div class="content-card-title">Actividad Reciente</div>
+            </div>
+            <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:rgba(245,166,35,0.15);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">📬</div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--text-dark);"><strong>SOL-2025-0138</strong> lista para retiro en Registro</div>
+                  <div style="font-size:11px;color:var(--text-light);margin-top:2px;">Hace 2 horas</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:rgba(67,148,65,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">✅</div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--text-dark);">Pago de <strong>RD$850</strong> verificado</div>
+                  <div style="font-size:11px;color:var(--text-light);margin-top:2px;">Hace 6 horas</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start;">
+                <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,62,126,0.10);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">📄</div>
+                <div>
+                  <div style="font-size:12.5px;color:var(--text-dark);">Solicitud <strong>SOL-2025-0142</strong> creada</div>
+                  <div style="font-size:11px;color:var(--text-light);margin-top:2px;">Hoy, 10:34 AM</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /spanel-inicio -->
+
+
+    <!-- ── TAB: NUEVA SOLICITUD ── -->
+    <div class="sol-tab-panel" id="spanel-nueva">
+      <div class="form-wrap">
+
+        <!-- Progress bar -->
+        <div class="form-progress" id="fprog">
+          <div class="fp-step">
+            <div class="fp-circle active" id="fc1">1</div>
+            <div class="fp-label active"  id="fl1">Tipo de Documento</div>
+          </div>
+          <div class="fp-line" id="fline1"></div>
+          <div class="fp-step">
+            <div class="fp-circle waiting" id="fc2">2</div>
+            <div class="fp-label waiting"  id="fl2">Datos y Propósito</div>
+          </div>
+          <div class="fp-line" id="fline2"></div>
+          <div class="fp-step">
+            <div class="fp-circle waiting" id="fc3">3</div>
+            <div class="fp-label waiting"  id="fl3">Pago y Confirmación</div>
+          </div>
+        </div>
+
+        <!-- Step 1: Document type -->
+        <div class="form-card" id="fs1">
+          <div class="form-card-title">Selecciona el tipo de documento</div>
+          <p class="form-card-desc">Elige el documento académico que necesitas. Tiempo de entrega estimado: 3 a 5 días hábiles.</p>
+          <div class="doc-pick-grid">
+            <div class="doc-pick-card" onclick="pickDoc(this,'Récord de Notas Oficial','850')">
+              <div class="dpc-icon">📜</div>
+              <div class="dpc-name">Récord de Notas</div>
+              <div class="dpc-price">RD$850</div>
+            </div>
+            <div class="doc-pick-card" onclick="pickDoc(this,'Constancia de Estudios','650')">
+              <div class="dpc-icon">📋</div>
+              <div class="dpc-name">Constancia de Estudios</div>
+              <div class="dpc-price">RD$650</div>
+            </div>
+            <div class="doc-pick-card" onclick="pickDoc(this,'Certificación de Graduación','1200')">
+              <div class="dpc-icon">🎓</div>
+              <div class="dpc-name">Cert. de Graduación</div>
+              <div class="dpc-price">RD$1,200</div>
+            </div>
+            <div class="doc-pick-card" onclick="pickDoc(this,'Pensum Aprobado','500')">
+              <div class="dpc-icon">📄</div>
+              <div class="dpc-name">Pensum Aprobado</div>
+              <div class="dpc-price">RD$500</div>
+            </div>
+            <div class="doc-pick-card" onclick="pickDoc(this,'Certificado de Conducta','450')">
+              <div class="dpc-icon">🏅</div>
+              <div class="dpc-name">Cert. de Conducta</div>
+              <div class="dpc-price">RD$450</div>
+            </div>
+            <div class="doc-pick-card" onclick="pickDoc(this,'Copia de Título','2500')">
+              <div class="dpc-icon">🏛</div>
+              <div class="dpc-name">Copia de Título</div>
+              <div class="dpc-price">RD$2,500</div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" onclick="goStep(2)">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Data -->
+        <div class="form-card" id="fs2" style="display:none;">
+          <div class="form-card-title">Datos de la solicitud</div>
+          <p class="form-card-desc">Completa la información requerida para procesar tu solicitud.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Nombre completo <span class="req-mark">*</span></label>
+              <input type="text" value="Noel Reyes de la Cruz" readonly>
+            </div>
+            <div class="form-group">
+              <label>Matrícula <span class="req-mark">*</span></label>
+              <input type="text" value="21-2021" readonly>
+            </div>
+            <div class="form-group">
+              <label>Carrera <span class="req-mark">*</span></label>
+              <input type="text" value="Ingeniería en Sistemas Computacionales" readonly>
+            </div>
+            <div class="form-group">
+              <label>Propósito del documento <span class="req-mark">*</span></label>
+              <select>
+                <option value="">Seleccionar...</option>
+                <option>Visa / Trámite consular</option>
+                <option>Empleo / Trabajo</option>
+                <option>Beca / Intercambio</option>
+                <option>Banco / Institución financiera</option>
+                <option>Estudios de posgrado</option>
+                <option>Uso personal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Idioma del documento <span class="req-mark">*</span></label>
+              <select>
+                <option>Español</option>
+                <option>Inglés</option>
+                <option>Español e Inglés</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cantidad de copias <span class="req-mark">*</span></label>
+              <select id="copies-sel">
+                <option value="1">1 copia</option>
+                <option value="2">2 copias</option>
+                <option value="3">3 copias</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Institución destinataria</label>
+              <input type="text" placeholder="Ej. Embajada de EE.UU.">
+            </div>
+            <div class="form-group full">
+              <label>Observaciones adicionales</label>
+              <textarea placeholder="Cualquier detalle especial para la elaboración del documento..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="goStep(1)">← Atrás</button>
+            <button class="btn-primary"   onclick="goStep(3)">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Payment -->
+        <div class="form-card" id="fs3" style="display:none;">
+          <div class="form-card-title">Comprobante de pago</div>
+          <p class="form-card-desc">Adjunta el comprobante de transferencia bancaria. Monto: <strong id="total-amount">RD$850.00</strong></p>
+
+          <div class="payment-info">
+            <div class="payment-info-title">💳 Datos bancarios para transferencia</div>
+            <div class="payment-info-body">
+              Banco: <strong>Banco Popular Dominicano</strong><br>
+              Cuenta: <strong>001-01234-5</strong> (Corriente)<br>
+              A nombre de: <strong>Universidad Nacional Pedro Henríquez Ureña</strong><br>
+              RNC: <strong>401-09812-0</strong>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label>Comprobante de pago <span class="req-mark">*</span></label>
+            <div class="upload-zone" onclick="showToast('📎','Archivo seleccionado','comprobante_pago.pdf — 245 KB')">
+              <div class="upload-icon">📎</div>
+              <div class="upload-txt">Arrastra tu comprobante aquí o haz clic para seleccionar</div>
+              <div class="upload-hint">PDF, JPG o PNG · Máx. 5 MB</div>
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <p style="font-size:12px;font-weight:700;color:var(--text-dark);margin-bottom:10px;">📋 Resumen de la solicitud</p>
+            <div class="detail-row"><span class="det-label">Documento</span><span class="det-val" id="sum-doc">—</span></div>
+            <div class="detail-row"><span class="det-label">Idioma</span><span class="det-val">Español</span></div>
+            <div class="detail-row"><span class="det-label">Copias</span><span class="det-val" id="sum-copies">1</span></div>
+            <div class="detail-row"><span class="det-label">Tiempo estimado</span><span class="det-val">3–5 días hábiles</span></div>
+            <div class="detail-row" style="border-bottom:none;">
+              <span class="det-label" style="font-weight:700;">Total</span>
+              <span class="det-val" id="sum-total" style="font-size:15px;color:var(--unphu-green-dark);font-weight:700;">RD$850.00</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="goStep(2)">← Atrás</button>
+            <button class="btn-primary"   onclick="submitForm()">✓ Enviar Solicitud</button>
+          </div>
+        </div>
+
+        <!-- Success -->
+        <div id="fs-ok" style="display:none;">
+          <div class="form-card">
+            <div class="success-screen">
+              <div class="success-ico">✓</div>
+              <div class="success-title">¡Solicitud enviada exitosamente!</div>
+              <p class="success-desc">Tu solicitud ha sido recibida y registrada en el sistema. Recibirás notificaciones en tu correo institucional <strong>nr21-2021@unphu.edu.do</strong> sobre el progreso.</p>
+              <div class="req-code" id="new-req-code">SOL-2025-0148</div>
+              <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn-secondary" onclick="switchSolTab('solicitudes')">Ver mis solicitudes</button>
+                <button class="btn-primary"   onclick="resetForm()">Nueva solicitud</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /form-wrap -->
+    </div><!-- /spanel-nueva -->
+
+
+    <!-- ── TAB: MIS SOLICITUDES ── -->
+    <div class="sol-tab-panel" id="spanel-solicitudes">
+      <div class="sol-filter-bar">
+        <div class="search-input-wrap">
+          <span style="color:var(--text-light);font-size:14px;">🔍</span>
+          <input type="text" placeholder="Buscar por código, tipo de documento...">
+        </div>
+        <select class="filter-sel">
+          <option>Todos los estados</option>
+          <option>En proceso</option>
+          <option>Listo para retiro</option>
+          <option>Entregado</option>
+          <option>Pendiente pago</option>
+        </select>
+        <select class="filter-sel">
+          <option>Todos los períodos</option>
+          <option>2025-2</option>
+          <option>2025-1</option>
+          <option>2024-2</option>
+        </select>
+      </div>
+
+      <div class="content-card">
+        <div class="req-list">
+
+          <div class="req-row" onclick="openReqModal('r1')">
+            <div class="req-row-ico">📜</div>
+            <div class="req-row-info">
+              <div class="req-row-title">Récord de Notas Oficial</div>
+              <div class="req-row-meta">SOL-2025-0142 &nbsp;·&nbsp; Visa &nbsp;·&nbsp; 1 copia &nbsp;·&nbsp; RD$850</div>
+            </div>
+            <div class="req-row-right">
+              <div class="req-row-date">12 Ene 2025</div>
+              <span class="sbadge process"><span class="sbadge-dot"></span>En proceso</span>
+            </div>
+          </div>
+
+          <div class="req-row" onclick="openReqModal('r2')">
+            <div class="req-row-ico">📋</div>
+            <div class="req-row-info">
+              <div class="req-row-title">Constancia de Estudios</div>
+              <div class="req-row-meta">SOL-2025-0138 &nbsp;·&nbsp; Empleo &nbsp;·&nbsp; 1 copia &nbsp;·&nbsp; RD$650</div>
+            </div>
+            <div class="req-row-right">
+              <div class="req-row-date">08 Ene 2025</div>
+              <span class="sbadge ready"><span class="sbadge-dot"></span>Listo para retiro</span>
+            </div>
+          </div>
+
+          <div class="req-row">
+            <div class="req-row-ico">🎓</div>
+            <div class="req-row-info">
+              <div class="req-row-title">Certificación de Graduación</div>
+              <div class="req-row-meta">SOL-2024-0891 &nbsp;·&nbsp; Posgrado &nbsp;·&nbsp; 2 copias &nbsp;·&nbsp; RD$2,400</div>
+            </div>
+            <div class="req-row-right">
+              <div class="req-row-date">15 Nov 2024</div>
+              <span class="sbadge done"><span class="sbadge-dot"></span>Entregado</span>
+            </div>
+          </div>
+
+          <div class="req-row">
+            <div class="req-row-ico">📄</div>
+            <div class="req-row-info">
+              <div class="req-row-title">Pensum Aprobado</div>
+              <div class="req-row-meta">SOL-2024-0867 &nbsp;·&nbsp; Beca MESCYT &nbsp;·&nbsp; 1 copia &nbsp;·&nbsp; RD$500</div>
+            </div>
+            <div class="req-row-right">
+              <div class="req-row-date">01 Nov 2024</div>
+              <span class="sbadge done"><span class="sbadge-dot"></span>Entregado</span>
+            </div>
+          </div>
+
+          <div class="req-row">
+            <div class="req-row-ico">🏅</div>
+            <div class="req-row-info">
+              <div class="req-row-title">Certificado de Conducta</div>
+              <div class="req-row-meta">SOL-2024-0844 &nbsp;·&nbsp; Personal &nbsp;·&nbsp; 1 copia &nbsp;·&nbsp; RD$450</div>
+            </div>
+            <div class="req-row-right">
+              <div class="req-row-date">20 Oct 2024</div>
+              <span class="sbadge pending"><span class="sbadge-dot"></span>Pendiente pago</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div><!-- /spanel-solicitudes -->
+
+
+    <!-- ── TAB: MIS DOCUMENTOS ── -->
+    <div class="sol-tab-panel" id="spanel-documentos">
+      <div style="max-width:680px;">
+        <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;line-height:1.6;">
+          Documentos digitales verificados con código QR y cifrado SHA-256. Disponibles para descarga inmediata.
+        </p>
+
+        <div class="content-card">
+          <div class="req-list">
+
+            <div class="req-row">
+              <div class="req-row-ico" style="background:rgba(0,62,126,0.08);">🎓</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Certificación de Graduación</div>
+                <div class="req-row-meta">SOL-2024-0891 · Nov 2024 · SHA-256: a7f3e9c2...</div>
+              </div>
+              <div class="req-row-right" style="display:flex;align-items:center;gap:8px;">
+                <span class="sbadge done"><span class="sbadge-dot"></span>QR Verificado</span>
+                <button class="btn-green" style="padding:6px 12px;font-size:12px;" onclick="showToast('📥','Descargando','cert_grad_2024.pdf')">Descargar</button>
+              </div>
+            </div>
+
+            <div class="req-row">
+              <div class="req-row-ico">📄</div>
+              <div class="req-row-info">
+                <div class="req-row-title">Pensum Aprobado</div>
+                <div class="req-row-meta">SOL-2024-0867 · Nov 2024 · SHA-256: b2d81a4f...</div>
+              </div>
+              <div class="req-row-right" style="display:flex;align-items:center;gap:8px;">
+                <span class="sbadge done"><span class="sbadge-dot"></span>QR Verificado</span>
+                <button class="btn-green" style="padding:6px 12px;font-size:12px;" onclick="showToast('📥','Descargando','pensum_2024.pdf')">Descargar</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding:16px 20px;background:var(--white);border-radius:var(--radius);border-left:3px solid var(--unphu-navy);box-shadow:var(--shadow);">
+          <div style="font-size:13px;font-weight:600;color:var(--unphu-navy);margin-bottom:6px;">🔍 Verificar autenticidad</div>
+          <p style="font-size:12.5px;color:var(--text-light);margin-bottom:12px;">Ingresa un código de verificación para confirmar la autenticidad de cualquier documento UNPHU.</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="verify-input" placeholder="Ej: UNPHU-2024-A7F3E9C2..." style="flex:1;padding:8px 12px;border:1px solid var(--unphu-gray-mid);border-radius:var(--radius-sm);font-size:13px;font-family:'Roboto',sans-serif;outline:none;">
+            <button class="btn-primary" onclick="verifyDoc()">Verificar</button>
+          </div>
+          <div id="verify-result" style="display:none;margin-top:12px;padding:12px;background:rgba(67,148,65,0.08);border:1px solid rgba(67,148,65,0.25);border-radius:var(--radius-sm);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="font-size:18px;">✅</span>
+              <span style="font-size:13px;font-weight:700;color:var(--unphu-green-dark);">Documento Auténtico y Verificado</span>
+            </div>
+            <div class="detail-row" style="font-size:12px;"><span class="det-label">Estudiante</span><span class="det-val">Noel Reyes de la Cruz</span></div>
+            <div class="detail-row" style="font-size:12px;"><span class="det-label">Documento</span><span class="det-val">Récord de Notas</span></div>
+            <div class="detail-row" style="font-size:12px;border-bottom:none;"><span class="det-label">Hash SHA-256</span><span class="det-val" style="font-size:11px;color:var(--unphu-green-dark);">a7f3e9c2b841d3f...</span></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /spanel-documentos -->
+
+  </div><!-- /page-solicitud-documentos -->
+
+</main>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="footer-bar" id="footer-bar">
+  UNPHU © Todos los derechos reservados 2026
+</footer>
+
+<!-- ═══════════════════════════════════════
+     MODAL — Detalle solicitud
+════════════════════════════════════════ -->
+<div class="modal-ov" id="req-modal-ov" onclick="if(event.target===this)closeReqModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="rm-title">Detalle de Solicitud</div>
+        <div class="modal-sub"   id="rm-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeReqModal()">✕</button>
+    </div>
+    <div class="modal-body" id="rm-body"></div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeReqModal()">Cerrar</button>
+      <button class="btn-primary"   onclick="showToast('📥','Descargando','solicitud_detalle.pdf')">Descargar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TOAST
+════════════════════════════════════════ -->
+<div class="toast" id="toast">
+  <div class="toast-ico" id="t-ico">✓</div>
+  <div>
+    <strong id="t-title"></strong>
+    <small  id="t-msg"></small>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════
+   SIDEBAR COLLAPSE
+════════════════════════════════════ */
+let sidebarOpen = true;
+
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  const sb   = document.getElementById('sidebar');
+  const main = document.getElementById('main-content');
+  const foot = document.getElementById('footer-bar');
+  const icon = document.getElementById('collapse-icon');
+  const lbl  = document.getElementById('collapse-label');
+
+  if (sidebarOpen) {
+    sb.classList.remove('collapsed');
+    main.classList.remove('collapsed-margin');
+    foot.classList.remove('collapsed-margin');
+    icon.textContent = '«';
+    lbl.textContent  = 'Ocultar menu';
+  } else {
+    sb.classList.add('collapsed');
+    main.classList.add('collapsed-margin');
+    foot.classList.add('collapsed-margin');
+    icon.textContent = '»';
+    lbl.textContent  = '';
+  }
+}
+
+/* ═══════════════════════════════════
+   PAGE NAVIGATION
+════════════════════════════════════ */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+
+  /* Mark active nav item */
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) {
+      n.classList.add('active');
+    }
+  });
+}
+
+/* ═══════════════════════════════════
+   SOL DOCS — Tab switch
+════════════════════════════════════ */
+function switchSolTab(name) {
+  document.querySelectorAll('.sol-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sol-tab-panel').forEach(p => p.classList.remove('active'));
+
+  const tab   = document.getElementById('stab-' + name);
+  const panel = document.getElementById('spanel-' + name);
+  if (tab)   tab.classList.add('active');
+  if (panel) panel.classList.add('active');
+}
+
+function openNuevaSolicitud() {
+  switchSolTab('nueva');
+  resetForm();
+}
+
+/* ═══════════════════════════════════
+   FORM STEPS
+════════════════════════════════════ */
+let currentStep     = 1;
+let selectedDoc     = '';
+let selectedPrice   = 850;
+let reqCounter      = 148;
+
+function pickDoc(el, name, price) {
+  document.querySelectorAll('.doc-pick-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDoc   = name;
+  selectedPrice = parseInt(price);
+}
+
+function goStep(step) {
+  const cur = document.getElementById('fs' + currentStep);
+  if (cur) cur.style.display = 'none';
+
+  if (step > 3) { submitForm(); return; }
+
+  currentStep = step;
+
+  if (step === 3) updateSummary();
+
+  const next = document.getElementById('fs' + step);
+  if (next) next.style.display = 'block';
+
+  updateProgress(step);
+}
+
+function updateSummary() {
+  const copies = parseInt(document.getElementById('copies-sel').value) || 1;
+  const total  = selectedPrice * copies;
+  const docName = selectedDoc || 'Récord de Notas Oficial';
+
+  document.getElementById('sum-doc').textContent    = docName;
+  document.getElementById('sum-copies').textContent = copies;
+  document.getElementById('sum-total').textContent  = 'RD$' + total.toLocaleString('es-DO') + '.00';
+  document.getElementById('total-amount').textContent = 'RD$' + total.toLocaleString('es-DO') + '.00';
+}
+
+function updateProgress(step) {
+  for (let i = 1; i <= 3; i++) {
+    const circle = document.getElementById('fc' + i);
+    const label  = document.getElementById('fl' + i);
+    const line   = document.getElementById('fline' + i);
+
+    if (i < step) {
+      circle.className = 'fp-circle done';
+      circle.textContent = '✓';
+      label.className  = 'fp-label done';
+      if (line) line.className = 'fp-line done';
+    } else if (i === step) {
+      circle.className = 'fp-circle active';
+      circle.textContent = i;
+      label.className  = 'fp-label active';
+      if (line) line.className = 'fp-line';
+    } else {
+      circle.className = 'fp-circle waiting';
+      circle.textContent = i;
+      label.className  = 'fp-label waiting';
+      if (line) line.className = 'fp-line';
+    }
+  }
+}
+
+function submitForm() {
+  const code = 'SOL-2025-0' + reqCounter++;
+  document.getElementById('new-req-code').textContent = code;
+
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('fs' + i);
+    if (el) el.style.display = 'none';
+  }
+
+  document.getElementById('fs-ok').style.display = 'block';
+  showToast('✅', '¡Solicitud enviada!', 'Código: ' + code);
+}
+
+function resetForm() {
+  document.getElementById('fs-ok').style.display = 'none';
+  currentStep   = 1;
+  selectedDoc   = '';
+  selectedPrice = 850;
+
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('fs' + i);
+    if (el) el.style.display = i === 1 ? 'block' : 'none';
+  }
+
+  document.querySelectorAll('.doc-pick-card').forEach(c => c.classList.remove('selected'));
+  updateProgress(1);
+}
+
+/* ═══════════════════════════════════
+   MODAL — Request detail
+════════════════════════════════════ */
+const REQ_DATA = {
+  r1: {
+    title: 'Récord de Notas Oficial',
+    sub: 'SOL-2025-0142 · 12 Enero 2025',
+    rows: [
+      ['Código',        'SOL-2025-0142'],
+      ['Documento',     'Récord de Notas Oficial'],
+      ['Propósito',     'Visa consular'],
+      ['Idioma',        'Español'],
+      ['Copias',        '1'],
+      ['Monto',         'RD$850.00'],
+      ['Fecha',         '12 Ene 2025'],
+      ['Estado',        '<span class="sbadge process"><span class="sbadge-dot"></span>En proceso</span>'],
+    ],
+    timeline: [
+      { icon:'✓', color:'done',    title:'Solicitud recibida',      desc:'Sistema procesó la solicitud', when:'12/01/2025 · 10:34 AM' },
+      { icon:'✓', color:'done',    title:'Pago verificado',         desc:'Comprobante aprobado',          when:'12/01/2025 · 11:05 AM' },
+      { icon:'▶', color:'current', title:'En revisión académica',   desc:'Registro está procesando',      when:'Est. 24–48h' },
+      { icon:'4', color:'wait',    title:'Disponible para entrega', desc:'Pendiente',                     when:'' },
+    ]
+  },
+  r2: {
+    title: 'Constancia de Estudios',
+    sub: 'SOL-2025-0138 · 08 Enero 2025',
+    rows: [
+      ['Código',    'SOL-2025-0138'],
+      ['Documento', 'Constancia de Estudios'],
+      ['Propósito', 'Empleo'],
+      ['Idioma',    'Español'],
+      ['Copias',    '1'],
+      ['Monto',     'RD$650.00'],
+      ['Fecha',     '08 Ene 2025'],
+      ['Estado',    '<span class="sbadge ready"><span class="sbadge-dot"></span>Listo para retiro</span>'],
+    ],
+    timeline: [
+      { icon:'✓', color:'done', title:'Solicitud recibida',      desc:'Sistema procesó la solicitud', when:'08/01/2025 · 02:44 PM' },
+      { icon:'✓', color:'done', title:'Pago verificado',         desc:'Comprobante aprobado',          when:'08/01/2025 · 03:10 PM' },
+      { icon:'✓', color:'done', title:'Revisión completada',     desc:'Documento preparado',           when:'09/01/2025 · 09:00 AM' },
+      { icon:'✓', color:'done', title:'Disponible para retiro',  desc:'Acude a Registro con tu ID',    when:'09/01/2025 · 10:30 AM' },
+    ]
+  }
+};
+
+function openReqModal(id) {
+  const d = REQ_DATA[id];
+  if (!d) return;
+
+  document.getElementById('rm-title').textContent = d.title;
+  document.getElementById('rm-sub').textContent   = d.sub;
+
+  const rowsHtml = d.rows.map(([lbl, val]) =>
+    `<div class="detail-row"><span class="det-label">${lbl}</span><span class="det-val">${val}</span></div>`
+  ).join('');
+
+  const tlHtml = d.timeline.map(t => `
+    <div class="tl-step">
+      <div class="tl-line-col">
+        <div class="tl-circle ${t.color}">${t.icon}</div>
+        ${t.color !== 'wait' ? '<div class="tl-connector ' + (t.color === 'done' ? 'done' : '') + '"></div>' : ''}
+      </div>
+      <div class="tl-body">
+        <div class="tl-title">${t.title}</div>
+        <div class="tl-desc">${t.desc}</div>
+        ${t.when ? '<div class="tl-meta">' + t.when + '</div>' : ''}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('rm-body').innerHTML = `
+    ${rowsHtml}
+    <div style="margin-top:18px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-light);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">📋 Seguimiento</div>
+      <div class="timeline">${tlHtml}</div>
+    </div>`;
+
+  document.getElementById('req-modal-ov').classList.add('open');
+}
+
+function closeReqModal() {
+  document.getElementById('req-modal-ov').classList.remove('open');
+}
+
+/* ═══════════════════════════════════
+   VERIFY DOC
+════════════════════════════════════ */
+function verifyDoc() {
+  const val = document.getElementById('verify-input').value.trim();
+  if (!val) { showToast('⚠️','Ingresa un código','El campo de verificación está vacío'); return; }
+  document.getElementById('verify-result').style.display = 'block';
+  showToast('✅','Documento verificado','Autenticidad confirmada con SHA-256');
+}
+
+/* ═══════════════════════════════════
+   TOAST
+════════════════════════════════════ */
+let toastTimer = null;
+
+function showToast(ico, title, msg) {
+  const el    = document.getElementById('toast');
+  const icoEl = document.getElementById('t-ico');
+  const ttl   = document.getElementById('t-title');
+  const tmsg  = document.getElementById('t-msg');
+
+  icoEl.textContent = ico;
+  ttl.textContent   = title;
+  tmsg.textContent  = msg;
+
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ═══════════════════════════════════
+   INIT — default page
+════════════════════════════════════ */
+showPage('perfil');
+</script>
+</body>
+</html>
