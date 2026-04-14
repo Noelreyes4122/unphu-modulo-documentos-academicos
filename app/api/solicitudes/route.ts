@@ -65,12 +65,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Document type not found' }, { status: 404 })
     }
 
-    // Calculate estimated date
-    let estimatedDate: Date | null = null
+    // Calculate estimated date with same-day logic
+    const now = new Date()
+    const hourDR = now.getUTCHours() - 4 // Dominican Republic is UTC-4
+    const isBeforeCutoff = hourDR < 14 // before 2 PM
+
+    let estimatedDate: Date | null = new Date()
     if (docType.deliveryDays === 0) {
+      // Immediate/auto PDF — same day always
       estimatedDate = new Date()
+    } else if (docType.deliveryDays === 1) {
+      // Same day if before 2PM, else next day
+      if (!isBeforeCutoff) {
+        estimatedDate.setDate(estimatedDate.getDate() + 1)
+      }
     } else {
-      estimatedDate = new Date()
       estimatedDate.setDate(estimatedDate.getDate() + docType.deliveryDays)
     }
 
@@ -89,6 +98,7 @@ export async function POST(req: NextRequest) {
       },
       include: {
         docType: true,
+        auditLogs: { orderBy: { createdAt: 'asc' } },
       },
     })
 

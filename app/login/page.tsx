@@ -41,35 +41,42 @@ export default function LoginPage() {
     <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '420px 1fr', background: '#f0f2f5' }}>
       {/* LEFT PANEL */}
       <div style={{
-        background: 'linear-gradient(160deg, #004d25 0%, #006837 40%, #439441 100%)',
+        background: 'linear-gradient(160deg, #004d25 0%, #006837 50%, #2d7a2b 100%)',
         display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         padding: '40px 36px', color: 'white', position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-        <div style={{ position: 'absolute', bottom: -80, left: -40, width: 280, height: 280, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+        {/* Diagonal decorative lines */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 60px)',
+          pointerEvents: 'none',
+        }} />
 
         {/* Logo */}
-        <div>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 28, letterSpacing: '-0.02em', marginBottom: 4 }}>
-            UNPHU<span style={{ color: '#8CC63E' }}>SIST</span>
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 26, letterSpacing: '-0.01em', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>UNPHU</span>
+            <span style={{
+              fontSize: 11, fontWeight: 700, border: '1.5px solid rgba(255,255,255,0.6)',
+              borderRadius: 4, padding: '2px 6px', letterSpacing: '0.08em',
+              color: 'rgba(255,255,255,0.85)',
+            }}>SIST</span>
           </div>
-          <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.6)', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             Sistema Universitario
           </div>
         </div>
 
         {/* Center content */}
-        <div>
-          <div style={{ fontSize: 48, marginBottom: 20, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}>🎓</div>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 22, lineHeight: 1.3, marginBottom: 12 }}>
-            Portal Estudiantil
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 900, fontSize: 34, lineHeight: 1.15, marginBottom: 14, letterSpacing: '-0.01em' }}>
+            Acceso<br />Estudiantes
           </div>
-          <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, marginBottom: 28 }}>
+          <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.72)', lineHeight: 1.7, marginBottom: 28 }}>
             Accede a tus documentos académicos y gestiona tus solicitudes universitarias.
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
             {[
               { icon: 'bi-file-earmark-text', text: 'Solicitud de documentos' },
               { icon: 'bi-download', text: 'Descarga de documentos' },
@@ -86,28 +93,39 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.45)' }}>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', position: 'relative', zIndex: 1 }}>
           Universidad Nacional Pedro Henríquez Ureña<br />
           © UNPHU 2026
         </div>
       </div>
 
       {/* RIGHT PANEL */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#f0f2f5' }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
           {/* Card */}
-          <div style={{ background: 'white', borderRadius: 14, boxShadow: '0 4px 32px rgba(0,62,126,0.10)', padding: '40px 36px' }}>
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 22, color: 'var(--navy)', marginBottom: 6 }}>
+          <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 4px 32px rgba(0,62,126,0.11)', padding: '40px 36px' }}>
+            {/* Logo / brand */}
+            <div style={{ marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: 'linear-gradient(135deg, #006837, #2d7a2b)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="bi bi-mortarboard-fill" style={{ color: 'white', fontSize: 20 }}></i>
+              </div>
+              <div>
+                <span style={{ color: '#439441', fontWeight: 900, fontSize: 22, fontFamily: 'Montserrat, sans-serif' }}>UNPHU</span>
+                <span style={{ fontSize: 11, fontWeight: 700, border: '1.5px solid #439441', borderRadius: 4, padding: '1px 5px', marginLeft: 6, color: '#439441' }}>SIST</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 20, color: '#0F2D4F', marginBottom: 4 }}>
                 Acceso Estudiantes
               </div>
-              <div style={{ fontSize: 13.5, color: 'var(--gray-500)' }}>
+              <div style={{ fontSize: 13, color: '#718096' }}>
                 Ingresa con tu matrícula UNPHU
               </div>
             </div>
 
             {/* Demo chip */}
-            <div style={{ background: '#f0f4ff', border: '1px solid #d0deff', borderRadius: 8, padding: '10px 14px', marginBottom: 20, fontSize: 12.5, color: 'var(--navy)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ background: '#f0f4ff', border: '1px solid #d0deff', borderRadius: 8, padding: '10px 14px', marginBottom: 20, fontSize: 12.5, color: '#003E7E', display: 'flex', alignItems: 'center', gap: 8 }}>
               <i className="bi bi-info-circle-fill" style={{ color: '#4a7fe5', flexShrink: 0 }}></i>
               <span>Demo: <strong style={{ fontFamily: 'monospace' }}>nr21-2021</strong> / <strong style={{ fontFamily: 'monospace' }}>Demo2026!</strong></span>
             </div>
@@ -120,61 +138,73 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>
-                  Matrícula / Usuario
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#4A5568', marginBottom: 6 }}>
+                  Usuario
                 </label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  placeholder="ej. nr21-2021"
-                  required
-                  style={{ width: '100%', padding: '11px 14px', border: '1.5px solid var(--gray-200)', borderRadius: 7, fontSize: 14, outline: 'none', transition: 'border-color 0.16s' }}
-                  onFocus={e => e.target.style.borderColor = 'var(--navy)'}
-                  onBlur={e => e.target.style.borderColor = 'var(--gray-200)'}
-                />
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: 16 }}>
+                    <i className="bi bi-person"></i>
+                  </span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    placeholder="ej. nr21-2021"
+                    required
+                    style={{ width: '100%', paddingLeft: 38, paddingRight: 14, paddingTop: 11, paddingBottom: 11, border: '1.5px solid #E2E8F0', borderRadius: 8, fontSize: 14, outline: 'none', transition: 'border-color 0.16s', boxSizing: 'border-box' }}
+                    onFocus={e => e.target.style.borderColor = '#003E7E'}
+                    onBlur={e => e.target.style.borderColor = '#E2E8F0'}
+                  />
+                </div>
               </div>
 
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 6 }}>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#4A5568', marginBottom: 6 }}>
                   Contraseña
                 </label>
                 <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: 16 }}>
+                    <i className="bi bi-lock"></i>
+                  </span>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    style={{ width: '100%', padding: '11px 42px 11px 14px', border: '1.5px solid var(--gray-200)', borderRadius: 7, fontSize: 14, outline: 'none', transition: 'border-color 0.16s' }}
-                    onFocus={e => e.target.style.borderColor = 'var(--navy)'}
-                    onBlur={e => e.target.style.borderColor = 'var(--gray-200)'}
+                    style={{ width: '100%', paddingLeft: 38, paddingRight: 42, paddingTop: 11, paddingBottom: 11, border: '1.5px solid #E2E8F0', borderRadius: 8, fontSize: 14, outline: 'none', transition: 'border-color 0.16s', boxSizing: 'border-box' }}
+                    onFocus={e => e.target.style.borderColor = '#003E7E'}
+                    onBlur={e => e.target.style.borderColor = '#E2E8F0'}
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-400)', fontSize: 15, padding: 0 }}>
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#A0AEC0', fontSize: 15, padding: 0 }}>
                     <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
                   </button>
                 </div>
               </div>
 
+              <div style={{ textAlign: 'right', marginBottom: 22 }}>
+                <span style={{ fontSize: 12, color: '#718096', cursor: 'pointer' }}>¿Olvidaste tu contraseña?</span>
+              </div>
+
               <button type="submit" disabled={loading}
-                style={{ width: '100%', padding: '13px', background: loading ? 'var(--gray-400)' : 'var(--green-dark)', color: 'white', border: 'none', borderRadius: 8, fontSize: 14.5, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.18s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                style={{ width: '100%', padding: '13px', background: loading ? '#A0AEC0' : '#003E7E', color: 'white', border: 'none', borderRadius: 8, fontSize: 14.5, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.18s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 {loading ? (
                   <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2, borderTopColor: 'white', borderColor: 'rgba(255,255,255,0.3)' }}></span> Iniciando sesión...</>
                 ) : (
-                  <><i className="bi bi-box-arrow-in-right"></i> Iniciar Sesión</>
+                  <>Ingresar</>
                 )}
               </button>
             </form>
 
-            <div style={{ textAlign: 'center', marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--gray-200)', fontSize: 13, color: 'var(--gray-500)' }}>
+            <div style={{ textAlign: 'center', marginTop: 22, paddingTop: 18, borderTop: '1px solid #E2E8F0', fontSize: 13, color: '#718096' }}>
               ¿Eres personal administrativo?{' '}
-              <Link href="/admin-login" style={{ color: 'var(--navy)', fontWeight: 600 }}>Acceso administrativo</Link>
+              <Link href="/admin-login" style={{ color: '#003E7E', fontWeight: 600 }}>Acceso administrativo</Link>
             </div>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 20, fontSize: 12, color: 'var(--gray-400)' }}>
+          <div style={{ textAlign: 'center', marginTop: 20, fontSize: 12, color: '#A0AEC0' }}>
             UNPHU © 2026 — Módulo de Documentos Académicos
           </div>
         </div>
