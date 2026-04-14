@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  Int      @id @default(autoincrement())
+  username            String   @unique
+  password            String
+  firstName           String   @default("")
+  lastName            String   @default("")
+  email               String   @default("")
+  role                String   @default("student")
+  matricula           String   @default("")
+  cedula              String   @default("")
+  carrera             String   @default("")
+  carreraCodigo       String   @default("")
+  periodoActivo       String   @default("1-2026")
+  telefono            String   @default("")
+  celular             String   @default("")
+  correoPersonal      String   @default("")
+  correoInstitucional String   @default("")
+  cargo               String   @default("")
+  isActive            Boolean  @default(true)
+  isSuperuser         Boolean  @default(false)
+  createdAt           DateTime @default(now())
+
+  requests          DocumentRequest[] @relation("StudentRequests")
+  processedRequests DocumentRequest[] @relation("ProcessedRequests")
+}
+
+model DocumentType {
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  icon         String   @default("")
+  price        Decimal  @db.Decimal(10, 2)
+  deliveryDays Int      @default(3)
+  isActive     Boolean  @default(true)
+  order        Int      @default(0)
+  autoPdf      Boolean  @default(false)
+
+  requests DocumentRequest[]
+}
+
+model DocumentRequest {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique
+  studentId      Int
+  docTypeId      Int
+  copies         Int          @default(1)
+  purpose        String       @default("personal")
+  language       String       @default("es")
+  institution    String       @default("")
+  observations   String       @default("")
+  paymentReceipt String?
+  status         String       @default("pending")
+  estimatedDate  DateTime?
+  adminNotes     String       @default("")
+  processedById  Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  student     User         @relation("StudentRequests", fields: [studentId], references: [id])
+  docType     DocumentType @relation(fields: [docTypeId], references: [id])
+  processedBy User?        @relation("ProcessedRequests", fields: [processedById], references: [id])
+  auditLogs   AuditLog[]
+}
+
+model AuditLog {
+  id        Int             @id @default(autoincrement())
+  requestId Int
+  action    String
+  icon      String          @default("")
+  actor     String
+  note      String
+  createdAt DateTime        @default(now())
+
+  request DocumentRequest @relation(fields: [requestId], references: [id])
+}

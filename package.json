@@ -1,0 +1,30 @@
+{
+  "name": "unphu-modulo-documentos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "next": "14.2.30",
+    "@prisma/client": "^5.22.0",
+    "next-auth": "^4.24.10",
+    "bcryptjs": "^2.4.3",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}
