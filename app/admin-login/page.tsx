@@ -111,13 +111,30 @@ export default function AdminLoginPage() {
         <div style={{ width: '100%', maxWidth: 400 }}>
           <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 4px 32px rgba(0,62,126,0.11)', padding: '40px 36px' }}>
             {/* Logo / brand */}
-            <div style={{ marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 10, background: 'linear-gradient(135deg, #0a1f38, #003E7E)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="bi bi-shield-lock-fill" style={{ color: 'white', fontSize: 20 }}></i>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 900,
+                fontSize: 42,
+                color: '#439441',
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                marginBottom: 4,
+              }}>UNPHU</div>
+              <div style={{ position: 'relative', margin: '0 auto 4px', width: '80%' }}>
+                <div style={{ height: 1.5, background: 'linear-gradient(to right, transparent, #94a3b8 30%, #94a3b8 70%, transparent)' }} />
               </div>
-              <div>
-                <span style={{ color: '#003E7E', fontWeight: 900, fontSize: 22, fontFamily: 'Montserrat, sans-serif' }}>UNPHU</span>
-                <span style={{ fontSize: 11, fontWeight: 700, border: '1.5px solid #003E7E', borderRadius: 4, padding: '1px 5px', marginLeft: 6, color: '#003E7E' }}>SIST</span>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '10%' }}>
+                <span style={{
+                  border: '2px solid #1e3a5f',
+                  borderRadius: 4,
+                  padding: '1px 10px',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: '#1e3a5f',
+                  fontFamily: "'Montserrat', sans-serif",
+                  letterSpacing: '0.08em',
+                }}>SIST</span>
               </div>
             </div>
 

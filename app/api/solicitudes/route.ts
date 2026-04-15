@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     // Calculate estimated date with same-day logic
     const now = new Date()
     const hourDR = now.getUTCHours() - 4 // Dominican Republic is UTC-4
-    const isBeforeCutoff = hourDR < 14 // before 2 PM
+    const isBeforeCutoff = hourDR < 10 // before 10 AM
 
     let estimatedDate: Date | null = new Date()
     if (docType.deliveryDays === 0) {

@@ -653,73 +653,236 @@ export default function SolicitudDocumentosPage() {
       {/* TAB: Mis Solicitudes */}
       {activeTab === 'mis' && (
         <div>
-          <div className="white-card">
-            <div className="card-header-row">
-              <div>
-                <div className="card-title">Mis Solicitudes</div>
-                <div className="card-sub">{requests.length} solicitud{requests.length !== 1 ? 'es' : ''} en total</div>
-              </div>
-              <button className="btn-primary" onClick={() => { setActiveTab('nueva'); setStep(1) }}>
-                <i className="bi bi-plus-lg"></i> Nueva
-              </button>
-            </div>
+          {/* Notice banner */}
+          <div style={{
+            background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+            border: '1px solid #bfdbfe',
+            borderLeft: '4px solid #2563eb',
+            borderRadius: 8,
+            padding: '12px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 13,
+            color: '#1e40af',
+          }}>
+            <i className="bi bi-info-circle-fill" style={{ fontSize: 16, flexShrink: 0 }}></i>
+            <span><strong>Aviso importante:</strong> Las solicitudes se procesan el mismo día si se reciben antes de las <strong>10:00 AM</strong>. Después de ese horario serán procesadas al siguiente día hábil.</span>
+          </div>
 
-            {requests.length === 0 ? (
+          <div className="card-header-row" style={{ marginBottom: 12 }}>
+            <div>
+              <div className="card-title">Mis Solicitudes</div>
+              <div className="card-sub">{requests.length} solicitud{requests.length !== 1 ? 'es' : ''} en total</div>
+            </div>
+            <button className="btn-primary" onClick={() => { setActiveTab('nueva'); setStep(1) }}>
+              <i className="bi bi-plus-lg"></i> Nueva
+            </button>
+          </div>
+
+          {requests.length === 0 ? (
+            <div className="white-card">
               <div className="empty-state">
                 <i className="bi bi-file-earmark-x" style={{ fontSize: 32, color: 'var(--gray-300)' }}></i>
                 No tienes solicitudes aún
               </div>
-            ) : (
-              requests.map(req => (
-                <div key={req.id} className="req-row">
-                  <div className="req-ico">{req.docType.icon}</div>
-                  <div className="req-info">
-                    <div className="req-title">{req.docType.name}</div>
-                    <div className="req-meta">
-                      <span className="code-chip">{req.code}</span>
-                      <span>·</span>
-                      <span>{req.copies} copia{req.copies !== 1 ? 's' : ''}</span>
-                      <span>·</span>
-                      <span style={{ textTransform: 'capitalize' }}>{req.purpose}</span>
-                      {req.institution && <><span>·</span><span>{req.institution}</span></>}
-                    </div>
-                    {req.adminNotes && (
-                      <div style={{ fontSize: 11.5, color: 'var(--gray-500)', marginTop: 4 }}>
-                        <i className="bi bi-chat-left-text"></i> {req.adminNotes}
-                      </div>
-                    )}
-                    {req.auditLogs.length > 0 && (
-                      <div style={{ marginTop: 6 }}>
-                        <div className="section-label">Historial</div>
-                        <div className="timeline">
-                          {req.auditLogs.slice(-3).map(log => (
-                            <div key={log.id} className="tl-step">
-                              <div className="tl-lc">
-                                <div className="tl-dot done">{log.icon || '●'}</div>
-                              </div>
-                              <div className="tl-body">
-                                <div className="tl-title">{log.note}</div>
-                                <div className="tl-when">{log.actor} · {formatDate(log.createdAt)}</div>
-                              </div>
-                            </div>
-                          ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {requests.map(req => {
+                // Determine step states based on status
+                const statusOrder: Record<string, number> = { pending: 0, process: 1, approved: 2, ready: 3, done: 4, rejected: -1 }
+                const idx = statusOrder[req.status] ?? 0
+                const isRejected = req.status === 'rejected'
+
+                const steps = [
+                  {
+                    key: 'received',
+                    label: 'Solicitud recibida',
+                    time: formatDate(req.createdAt),
+                    state: 'done' as const,
+                    desc: undefined as string | undefined,
+                  },
+                  {
+                    key: 'payment',
+                    label: 'Pago verificado',
+                    time: idx >= 1 ? formatDate(req.createdAt) : undefined,
+                    state: (isRejected ? 'skip' : idx >= 1 ? 'done' : 'pending') as 'done' | 'pending' | 'active' | 'skip',
+                    desc: undefined as string | undefined,
+                  },
+                  {
+                    key: 'review',
+                    label: 'En revisión académica',
+                    time: idx >= 2 ? formatDate(req.createdAt) : undefined,
+                    state: (isRejected ? 'skip' : idx === 1 ? 'active' : idx >= 2 ? 'done' : 'pending') as 'done' | 'pending' | 'active' | 'skip',
+                    desc: idx === 1 ? 'Tiempo estimado: 24–48h' : undefined,
+                  },
+                  {
+                    key: 'ready',
+                    label: 'Disponible para entrega',
+                    time: req.estimatedDate ? formatDate(req.estimatedDate) : undefined,
+                    state: (isRejected ? 'skip' : idx >= 3 ? 'done' : 'pending') as 'done' | 'pending' | 'active' | 'skip',
+                    desc: undefined as string | undefined,
+                  },
+                ]
+
+                const statusLabels: Record<string, string> = {
+                  pending: 'Pendiente', process: 'En proceso', approved: 'Aprobado',
+                  ready: 'Listo para retirar', done: 'Entregado', rejected: 'Rechazado',
+                }
+                const statusColors: Record<string, { bg: string; color: string; border: string }> = {
+                  pending:  { bg: '#fef9c3', color: '#854d0e', border: '#fde68a' },
+                  process:  { bg: '#dbeafe', color: '#1e40af', border: '#93c5fd' },
+                  approved: { bg: '#d1fae5', color: '#065f46', border: '#6ee7b7' },
+                  ready:    { bg: '#dcfce7', color: '#14532d', border: '#4ade80' },
+                  done:     { bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' },
+                  rejected: { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+                }
+                const sc = statusColors[req.status] || statusColors.pending
+
+                return (
+                  <div key={req.id} style={{
+                    background: 'white',
+                    borderRadius: 12,
+                    border: '1px solid var(--gray-200)',
+                    overflow: 'hidden',
+                    boxShadow: '0 1px 6px rgba(0,0,0,0.06)',
+                    display: 'flex',
+                  }}>
+                    {/* Left: request info */}
+                    <div style={{ flex: 1, padding: '20px 22px' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+                        <div style={{ fontSize: 28, lineHeight: 1 }}>{req.docType.icon}</div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--navy)', marginBottom: 3 }}>
+                            {req.docType.name}
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', fontSize: 12, color: 'var(--gray-500)' }}>
+                            <span className="code-chip">{req.code}</span>
+                            <span>·</span>
+                            <span>{req.copies} copia{req.copies !== 1 ? 's' : ''}</span>
+                            <span>·</span>
+                            <span style={{ textTransform: 'capitalize' }}>{req.purpose}</span>
+                            {req.institution && <><span>·</span><span>{req.institution}</span></>}
+                          </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                  <div className="req-right">
-                    <StatusBadge status={req.status} />
-                    <div className="req-date">{formatDate(req.createdAt)}</div>
-                    {req.estimatedDate && req.status !== 'done' && req.status !== 'rejected' && (
-                      <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>
-                        Est: {formatDate(req.estimatedDate)}
+
+                      {req.adminNotes && (
+                        <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '8px 10px', fontSize: 12, color: '#92400e', marginBottom: 10 }}>
+                          <i className="bi bi-chat-left-text"></i> {req.adminNotes}
+                        </div>
+                      )}
+
+                      {req.auditLogs && req.auditLogs.length > 0 && (
+                        <div style={{ marginTop: 8 }}>
+                          <div className="section-label" style={{ marginBottom: 6 }}>Historial de actividad</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {req.auditLogs.slice(-3).map(log => (
+                              <div key={log.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                                <span style={{ fontSize: 13, lineHeight: 1.5 }}>{log.icon || '●'}</span>
+                                <div>
+                                  <div style={{ fontSize: 12, color: 'var(--gray-700)' }}>{log.note}</div>
+                                  <div style={{ fontSize: 11, color: 'var(--gray-400)' }}>{log.actor} · {formatDate(log.createdAt)}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: status tracker */}
+                    <div style={{ width: 270, borderLeft: '1px solid var(--gray-200)', padding: '20px 20px', flexShrink: 0, background: '#fafafa' }}>
+                      {/* Status badge */}
+                      <div style={{ marginBottom: 16, textAlign: 'center' }}>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          background: sc.bg, color: sc.color, border: `1px solid ${sc.border}`,
+                          borderRadius: 20, padding: '5px 14px', fontSize: 12.5, fontWeight: 700,
+                        }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: sc.color, display: 'inline-block' }}></span>
+                          {statusLabels[req.status] || req.status}
+                        </span>
                       </div>
-                    )}
+
+                      {/* Timeline stepper */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                        {steps.map((step, i) => {
+                          const isDone = step.state === 'done'
+                          const isActive = step.state === 'active'
+                          const isLast = i === steps.length - 1
+
+                          return (
+                            <div key={step.key} style={{ display: 'flex', gap: 10 }}>
+                              {/* Icon + connector */}
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{
+                                  width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  background: isDone ? '#006837' : isActive ? '#2563eb' : '#e2e8f0',
+                                  color: isDone || isActive ? 'white' : '#94a3b8',
+                                  fontSize: isDone ? 12 : 11, fontWeight: 700,
+                                  border: isActive ? '2px solid #93c5fd' : 'none',
+                                  boxShadow: isActive ? '0 0 0 3px rgba(37,99,235,0.12)' : 'none',
+                                }}>
+                                  {isDone ? <i className="bi bi-check"></i> : isActive ? <i className="bi bi-arrow-repeat"></i> : <i className="bi bi-circle"></i>}
+                                </div>
+                                {!isLast && (
+                                  <div style={{
+                                    width: 2, flex: 1, minHeight: 18,
+                                    background: isDone ? '#006837' : '#e2e8f0',
+                                    margin: '2px 0',
+                                  }} />
+                                )}
+                              </div>
+
+                              {/* Step content */}
+                              <div style={{ paddingBottom: isLast ? 0 : 14, paddingTop: 2, flex: 1 }}>
+                                <div style={{
+                                  fontSize: 12, fontWeight: isActive ? 700 : 600,
+                                  color: isDone ? '#064e3b' : isActive ? '#1e40af' : '#94a3b8',
+                                }}>
+                                  {step.label}
+                                </div>
+                                {step.time && (
+                                  <div style={{ fontSize: 10.5, color: '#64748b', marginTop: 1 }}>{step.time}</div>
+                                )}
+                                {step.desc && (
+                                  <div style={{
+                                    fontSize: 10.5, marginTop: 3, background: '#eff6ff',
+                                    color: '#2563eb', border: '1px solid #bfdbfe',
+                                    borderRadius: 4, padding: '2px 7px', display: 'inline-block',
+                                  }}>
+                                    <i className="bi bi-clock"></i> {step.desc}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Estimated date */}
+                      {req.estimatedDate && req.status !== 'done' && req.status !== 'rejected' && (
+                        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--gray-200)', fontSize: 11.5, color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <i className="bi bi-calendar-check" style={{ color: '#006837' }}></i>
+                          Entrega est.: <strong style={{ color: 'var(--navy)' }}>{formatDate(req.estimatedDate)}</strong>
+                        </div>
+                      )}
+
+                      {isRejected && (
+                        <div style={{ marginTop: 10, padding: '8px 10px', background: '#fee2e2', borderRadius: 6, fontSize: 11.5, color: '#991b1b' }}>
+                          <i className="bi bi-x-circle"></i> Solicitud rechazada
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 
